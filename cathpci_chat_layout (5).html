@@ -171,7 +171,7 @@ body {
   min-width: 0;
 }
 .sel-sidebar {
-  width: 288px;
+  width: 340px;
   flex-shrink: 0;
   position: sticky;
   top: 112px;
@@ -187,100 +187,100 @@ body {
 }
 .sel-sidebar.on { display: block; }
 .ss-head {
-  padding: 13px 16px 11px;
+  padding: 16px 20px 14px;
   border-bottom: 1px solid var(--rule);
   background: linear-gradient(135deg, #013349 0%, #074F71 100%);
 }
 .ss-title {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; font-weight: 700;
+  font-size: 12px; font-weight: 700;
   letter-spacing: 1.5px; text-transform: uppercase;
   color: rgba(255,255,255,0.75);
 }
-.ss-body { padding: 12px 14px 16px; background: var(--bg-card); }
+.ss-body { padding: 14px 18px 18px; background: var(--bg-card); }
 .ss-visit {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .ss-visit:last-child { margin-bottom: 0; }
 .ss-visit-label {
-  font-size: 10px; font-weight: 700;
+  font-size: 12px; font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
   color: #013349;
   text-transform: uppercase; letter-spacing: 0.8px;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
-.ss-chips { display: flex; flex-direction: column; gap: 3px; }
+.ss-chips { display: flex; flex-direction: column; gap: 4px; }
 .ss-chip {
-  font-size: 11px; font-weight: 500;
+  font-size: 13px; font-weight: 500;
   font-family: 'DM Sans', sans-serif;
   color: #00AEC7;
   background: #013349;
   border: 1px solid rgba(0,174,199,0.3);
   border-radius: 4px;
-  padding: 3px 7px;
+  padding: 4px 9px;
   line-height: 1.4;
 }
 .ss-empty {
-  font-size: 11px; color: #074F71;
+  font-size: 13px; color: #074F71;
   font-style: italic;
   font-family: 'DM Sans', sans-serif;
 }
 .ss-section-lbl {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 8px; font-weight: 700;
+  font-size: 10px; font-weight: 700;
   letter-spacing: 1.2px; text-transform: uppercase;
   color: #074F71;
-  margin: 8px 0 4px;
-  padding-bottom: 3px;
+  margin: 10px 0 5px;
+  padding-bottom: 4px;
   border-bottom: 1px solid var(--rule);
 }
 .ss-ind-tag {
   display: inline-block;
-  font-size: 10.5px; font-weight: 500;
+  font-size: 13px; font-weight: 500;
   font-family: 'DM Sans', sans-serif;
   color: var(--navy);
   background: var(--blue-lt);
   border: 1px solid #B3CCEE;
   border-radius: 6px;
-  padding: 3px 8px;
-  margin: 1px 2px 1px 0;
+  padding: 4px 10px;
+  margin: 2px 2px 2px 0;
   line-height: 1.5;
 }
 .ss-pci-tag {
   display: inline-block;
-  font-size: 10.5px; font-weight: 600;
+  font-size: 13px; font-weight: 600;
   font-family: 'DM Sans', sans-serif;
   color: var(--orange);
   background: var(--ora-lt);
   border: 1px solid rgba(202,54,4,0.2);
   border-radius: 6px;
-  padding: 3px 8px;
-  margin: 1px 2px 1px 0;
+  padding: 4px 10px;
+  margin: 2px 2px 2px 0;
   line-height: 1.5;
 }
 .ss-pci-pending {
   display: inline-block;
-  font-size: 10.5px; font-weight: 500;
+  font-size: 13px; font-weight: 500;
   font-family: 'DM Sans', sans-serif;
   color: #F5A623;
   background: rgba(245,166,35,0.1);
   border: 1px solid rgba(245,166,35,0.3);
   border-radius: 4px;
-  padding: 2px 7px;
-  margin: 1px 2px 1px 0;
+  padding: 3px 9px;
+  margin: 2px 2px 2px 0;
   line-height: 1.5;
   font-style: italic;
 }
 .ss-warn-tag {
   display: inline-block;
-  font-size: 10.5px; font-weight: 500;
+  font-size: 13px; font-weight: 500;
   font-family: 'DM Sans', sans-serif;
   color: var(--amber);
   background: rgba(245,166,35,0.12);
   border: 1px solid rgba(245,166,35,0.3);
   border-radius: 6px;
-  padding: 3px 8px;
-  margin: 1px 0;
+  padding: 4px 10px;
+  margin: 2px 0;
   line-height: 1.5;
 }
 .ss-visit-active {
@@ -1045,18 +1045,6 @@ body {
   <!-- WELCOME -->
   <div class="welcome" id="welcome">
     <div class="wc-inner">
-      <div class="wc-emblem">
-        <svg viewBox="0 0 60 60" fill="none">
-          <polygon points="30,4 25,22 35,22" fill="#0B2545"/>
-          <polygon points="30,56 35,38 25,38" fill="#0B2545"/>
-          <polygon points="4,30 22,25 22,35" fill="#0B2545"/>
-          <polygon points="56,30 38,35 38,25" fill="#0B2545"/>
-          <polygon points="10,10 22,24 26,20" fill="#0B2545" opacity="0.4"/>
-          <polygon points="50,10 38,24 34,20" fill="#0B2545" opacity="0.4"/>
-          <polygon points="10,50 22,36 26,40" fill="#0B2545" opacity="0.4"/>
-          <polygon points="50,50 38,36 34,40" fill="#0B2545" opacity="0.4"/>
-        </svg>
-      </div>
       <div class="wc-title">Cath Lab &amp; PCI Indication<br>Decision Guide</div>
       <div class="wc-sub">Answer one question at a time to identify the correct Seq&nbsp;#7400 and Seq&nbsp;#7825 indications for each Cath Lab visit in this encounter.</div>
 
