@@ -1148,6 +1148,8 @@ function blank(caseType) {
     stemi_immediate:null,      // true | false (if no lytics)
     stemi_sx_dur:null,         // 'lte12' | 'gt12' (if not immediate)
     stemi_unstable:null,       // true | false (instability present)
+    // Cardiovascular Instability (Seq #7410): true | false
+    cv_instability: null,
     // Step index currently being re-edited (-1 = none)
     acs_sel_done:false,
     reopenedStep:-1
@@ -1374,6 +1376,58 @@ var CONFLICT_RULES = [
     rationale:'A patient presenting status post cardiac arrest is in an acute, emergent state and cannot be classified as stable. Stable Known CAD requires hemodynamic stability and the absence of acute symptoms. Cardiac arrest is one of the most extreme acute presentations and is directly incompatible with the “stable” qualifier.'
   }
 ];
+
+/* ── PCI INDICATION RULES (Seq #7825 vs Seq #7400 and Seq #7410 cross-validation) ──
+   Each entry: { pciIndication: string, blockedSels?: [val, ...], cvInstabilityBlocked?: bool,
+                 reason: string, rationale: string }
+   Applied only for PCI visits when a resolved (non-pending) PCI indication exists. */
+var PCI_INDICATION_RULES = [
+  // Stable Angina incompatible with specific Seq #7400 indications
+  {
+    pciIndication: 'Stable Angina',
+    blockedSels: ['noa', 'rca', 'wora'],
+    reason: 'Stable Angina (Seq #7825) is incompatible with New Onset Angina \u22642 months, Resuscitated Cardiac Arrest, and Worsening Angina (Seq #7400).',
+    rationale: 'Stable Angina as a PCI indication requires an established, unchanging anginal pattern with no acute presentation. New Onset Angina (within 2 months), Resuscitated Cardiac Arrest, and Worsening Angina all represent acute or unstable clinical states that are directly incompatible with a Stable Angina PCI indication. Review and correct the Seq #7400 selections or verify the appropriate PCI indication.'
+  },
+  // Stable Angina incompatible with Cardiovascular Instability = Yes (Seq #7410)
+  {
+    pciIndication: 'Stable Angina',
+    cvInstabilityBlocked: true,
+    reason: 'Stable Angina (Seq #7825) cannot be coded when Cardiovascular Instability (Seq #7410) is Yes.',
+    rationale: 'A Stable Angina PCI indication requires the patient to be hemodynamically stable at the time of the procedure. Cardiovascular Instability (Yes) indicates cardiogenic shock, hemodynamic compromise, or similar acute instability \u2014 which directly contradicts the stable clinical state required for a Stable Angina indication. Review whether the PCI indication or the cardiovascular instability answer is incorrect.'
+  },
+  // CAD without ischemic Sx incompatible with specific Seq #7400 indications
+  {
+    pciIndication: 'CAD (without ischemic Sx)',
+    blockedSels: ['rca', 'wora', 'noa'],
+    reason: 'CAD without ischemic Sx (Seq #7825) is incompatible with Resuscitated Cardiac Arrest, Worsening Angina, and New Onset Angina \u22642 months (Seq #7400).',
+    rationale: 'CAD without ischemic symptoms as a PCI indication requires that the patient has no ischemic symptoms driving the visit. Resuscitated Cardiac Arrest, Worsening Angina, and New Onset Angina all represent ischemic or acute presentations that are directly incompatible with a "without ischemic symptoms" designation. Review and correct the Seq #7400 selections or verify the appropriate PCI indication.'
+  }
+];
+
+/* Returns PCI indication vs. Seq #7400 / Seq #7410 conflicts for a PCI visit */
+function getPCIIndicationConflicts(idx) {
+  var v = S.visits[idx];
+  if(v.caseType !== 'pci') return [];
+  var pci = getPCI(idx);
+  if(!pci || pci.pending || !pci.opts || pci.opts.length === 0) return [];
+  var pciInd = pci.opts[0];
+  var sels = getSels(idx);
+  var conflicts = [];
+  PCI_INDICATION_RULES.forEach(function(rule) {
+    if(rule.pciIndication !== pciInd) return;
+    if(rule.blockedSels) {
+      var present = rule.blockedSels.filter(function(b){ return sels.indexOf(b) >= 0; });
+      if(present.length > 0) {
+        conflicts.push({ type:'sel', pciIndication:pciInd, blockedSels:present, reason:rule.reason, rationale:rule.rationale });
+      }
+    }
+    if(rule.cvInstabilityBlocked && v.cv_instability === true) {
+      conflicts.push({ type:'cv_instability', pciIndication:pciInd, reason:rule.reason, rationale:rule.rationale });
+    }
+  });
+  return conflicts;
+}
 
 /* Returns set of blocked indication values given currently selected values */
 function getBlockedVals(currentSels) {
@@ -1836,6 +1890,21 @@ function buildThread(idx){
     }
   }
 
+
+  // ── PCI Indication conflict banners (Seq #7825 vs #7400 / #7410) ──
+  if(v.caseType==='pci'){
+    var pciConflicts=getPCIIndicationConflicts(idx);
+    pciConflicts.forEach(function(c){
+      h+='<div class="conflict-banner">'+
+        '<span class="conflict-banner-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg></span>'+
+        '<div class="conflict-banner-body">'+
+          '<strong>'+c.reason+'</strong>'+
+          (c.rationale?'<div class="conflict-banner-msg">'+c.rationale+'</div>':'')+
+          '<div class="conflict-banner-action">&#8593; Edit the relevant answers above to resolve this conflict.</div>'+
+        '</div>'+
+      '</div>';
+    });
+  }
 
   // ── Next Visit button (shown when a subsequent visit exists) ──
   if(S.n>1&&idx<S.n-1){
@@ -2336,6 +2405,31 @@ function getSteps(idx){
     alerts:function(){ return []; }
   });
 
+  // ── CARDIOVASCULAR INSTABILITY (PCI visits only — Seq #7410) ──
+  if(v.caseType === 'pci'){
+    steps.push({divider:true, icon:'&#9888;', label:'Cardiovascular Instability'});
+    steps.push({
+      id:'cv_instability',
+      q:'Is there evidence of Cardiovascular Instability? (Seq #7410)',
+      hint:'Cardiovascular Instability includes cardiogenic shock, hemodynamic compromise requiring vasopressors or mechanical support, or other signs of acute cardiovascular instability at the time of the procedure.',
+      chipLabel:'Cardiovascular Instability?',
+      type:'yn',
+      opts:[
+        {val:true,  lbl:'Yes \u2014 Cardiovascular Instability present'},
+        {val:false, lbl:'No \u2014 No Cardiovascular Instability'}
+      ],
+      getAnswer:function(v){ return v.cv_instability; },
+      chipAnswer:function(v){ return v.cv_instability?'Yes':'No'; },
+      chipAlert:function(v){
+        var pci=getPCI(idx);
+        if(v.cv_instability===true && pci && !pci.pending && pci.opts && pci.opts[0]==='Stable Angina'){
+          return {cls:'ia-warn', icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>', msg:'<strong>Conflict (Seq #7410 vs Seq #7825):</strong> Cardiovascular Instability cannot be Yes when the PCI Indication is Stable Angina. Stable Angina requires hemodynamic stability. Review the PCI indication or correct this answer.'};
+        }
+        return null;
+      }
+    });
+  }
+
   return steps;
 }
 
@@ -2351,7 +2445,8 @@ var SECTION_COLORS = {
   'Non-Cardiac / Evaluation': 'var(--eval-accent)',
   'Suspected CAD': 'var(--susp-accent)',
   'Other': 'var(--other-accent)',
-  'STEMI Details': '#C0392B'
+  'STEMI Details': '#C0392B',
+  'Cardiovascular Instability': '#7B2D8B'
 };
 function sectionDivider(icon,label){
   var color='#101820';
@@ -2738,6 +2833,17 @@ function renderSidebar(){
           h+='<span class="ss-pci-pending">&#9432; '+pci.opts[0]+'</span>';
         } else {
           pci.opts.forEach(function(o){ h+='<span class="ss-pci-tag">'+o+'</span>'; });
+        }
+        h+='</div>';
+        // Seq #7410 — Cardiovascular Instability (PCI only)
+        h+='<div class="ss-section-lbl">Seq #7410</div>';
+        h+='<div>';
+        var _cv=S.visits[i].cv_instability;
+        if(_cv===null){
+          h+='<span class="ss-empty">Pending</span>';
+        } else {
+          var _cvCls=_cv?'ss-pci-tag':'ss-ind-tag';
+          h+='<span class="'+_cvCls+'">'+ (_cv?'CV Instability: Yes':'CV Instability: No') +'</span>';
         }
         h+='</div>';
       }
