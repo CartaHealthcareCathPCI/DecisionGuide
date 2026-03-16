@@ -2382,6 +2382,8 @@ function openCard(step, idx, v, isActive){
     // Use getAnswer() so array-backed fields (acs_type) resolve correctly
     var answered=step.getAnswer(v);
     step.opts.forEach(function(o){
+      // Insert a full-width break before "No ACS" so it sits on its own line
+      if(o.val==='acs_no'){ h+='<div style="width:100%;margin:0"></div>'; }
       var isOn=(answered!==null)&&(
         Array.isArray(answered) ? answered.indexOf(o.val)>=0 : answered===o.val
       );
