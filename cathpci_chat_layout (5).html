@@ -25,12 +25,12 @@
   --text-md: #2C4A5A;
   --text-lt: #5A7A8A;
   --text-dim:#8AAAB8;
-  --green:   #0D6B3A;
-  --green-lt:#E6F7F0;
-  --green-bd:#5EC9A0;
-  --amber:   #A0510A;
-  --amber-lt:#FFF4E6;
-  --amber-bd:#F5B870;
+  --green:   #0A9449;
+  --green-lt:#C8FAE0;
+  --green-bd:#1ED46A;
+  --amber:   #9A6800;
+  --amber-lt:#FFFBE0;
+  --amber-bd:#FFD426;
   --red:     #B8200A;
   --red-lt:  #FDECEA;
   --red-bd:  #F5A088;
@@ -804,8 +804,8 @@ body {
 }
 /* CAUTION — requires attention; also used for conflicts */
 .ia-warn, .ia-danger {
-  background: rgba(245,166,35,0.1);
-  border: 1px solid rgba(245,166,35,0.3);
+  background: rgba(255,212,38,0.13);
+  border: 1px solid rgba(255,212,38,0.55);
   color: var(--amber);
 }
 
@@ -814,8 +814,8 @@ body {
   margin: 8px 24px 0;
   padding: 14px 16px;
   border-radius: 6px;
-  background: rgba(245,166,35,0.1);
-  border: 1px solid rgba(245,166,35,0.3);
+  background: rgba(255,212,38,0.13);
+  border: 1px solid rgba(255,212,38,0.55);
   color: var(--amber);
   display: flex; align-items: flex-start; gap: 12px;
   animation: fadeIn .25s ease;
@@ -829,7 +829,7 @@ body {
 .conflict-banner-action {
   font-size: 14px; font-weight: 600;
   padding: 6px 12px;
-  background: rgba(146,96,10,0.1);
+  background: rgba(180,130,0,0.12);
   border: 1px solid var(--amber-bd);
   border-radius: 4px;
   display: inline-block;
@@ -1812,7 +1812,7 @@ function buildThread(idx){
         var labelA=LABELS[msg.selA]||msg.selA;
         var labelB=LABELS[msg.selB]||msg.selB;
         h+='<div class="conflict-banner">'+
-          '<span class="conflict-banner-icon">&#9888;</span>'+
+          '<span class="conflict-banner-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg></span>'+
           '<div class="conflict-banner-body">'+
             '<strong>Conflicting selections: “'+labelA+'” and “'+labelB+'”</strong>'+
             (msg.rationale?'<div class="conflict-banner-msg">'+msg.rationale+'</div>':'')+
@@ -1896,7 +1896,7 @@ function getSteps(idx){
         chipAnswer:function(v){ return v.newAcsEpisode?'Yes — New ACS episode':'No — ACS not re-applicable'; },
         chipAlert:function(v){
           if(v.newAcsEpisode===true) return {cls:'ia-ok',icon:'&#10003;',msg:'New ACS episode confirmed — ACS indications are available for this visit.'};
-          if(v.newAcsEpisode===false) return {cls:'ia-warn',icon:'&#9888;',msg:'<strong>ACS is not re-applicable.</strong> The prior ACS event closed at Visit '+idx+'. Code the current indication (typically <strong>Stable Known CAD</strong> for a staged/planned follow-up).'};
+          if(v.newAcsEpisode===false) return {cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:'<strong>ACS is not re-applicable.</strong> The prior ACS event closed at Visit '+idx+'. Code the current indication (typically <strong>Stable Known CAD</strong> for a staged/planned follow-up).'};
           return null;
         }
       });
@@ -2106,7 +2106,7 @@ function getSteps(idx){
     getAnswer:function(v){ return v.cad_hx; },
     chipAnswer:function(v){ return v.cad_hx?'Yes — documented CAD':'No documented CAD'; },
     chipAlert:function(v){
-      if(v.cad_hx===false&&suspBlocked(idx)) return {cls:'ia-warn',icon:'&#9888;',msg:'<strong>Suspected CAD is blocked</strong> — a prior visit confirmed CAD ≥50%.'};
+      if(v.cad_hx===false&&suspBlocked(idx)) return {cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:'<strong>Suspected CAD is blocked</strong> — a prior visit confirmed CAD ≥50%.'};
       return null;
     }
   });
@@ -2138,7 +2138,7 @@ function getSteps(idx){
       chipAnswer:function(v){ return v.cad_stable?'Yes — Stable Known CAD':'No — Unstable'; },
       chipAlert:function(v){
         if(v.cad_stable===true) return {cls:'ia-ok',icon:'&#10003;',msg:'<strong>Stable Known CAD</strong> applies to this visit.'};
-        if(v.cad_stable===false) return {cls:'ia-warn',icon:'&#9888;',msg:'Known CAD but unstable — do <em>not</em> select Stable Known CAD. Continue to identify the current acute condition.'};
+        if(v.cad_stable===false) return {cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:'Known CAD but unstable — do <em>not</em> select Stable Known CAD. Continue to identify the current acute condition.'};
         return null;
       }
     });
@@ -2161,7 +2161,7 @@ function getSteps(idx){
         if(idx>0 && v.caseType==='pci'){
           for(var _p=0;_p<idx;_p++){
             if(S.visits[_p].caseType==='pci' && getSels(_p).indexOf('rca')>=0){
-              return {cls:'ia-warn',icon:'&#9888;',msg:'<strong>Resuscitated Cardiac Arrest</strong> was coded on a prior PCI visit in this encounter. PCI closes all indications — only re-select if a <em>new cardiac arrest</em> is documented after that visit.'};
+              return {cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:'<strong>Resuscitated Cardiac Arrest</strong> was coded on a prior PCI visit in this encounter. PCI closes all indications — only re-select if a <em>new cardiac arrest</em> is documented after that visit.'};
             }
           }
         }
@@ -2208,7 +2208,7 @@ function getSteps(idx){
         var dupes=v.nonisch_sel.filter(function(s){ return priorSels.indexOf(s)>=0; });
         if(dupes.length>0){
           var dupeLabels=dupes.map(function(s){ return '<strong>'+(LABELS[s]||s)+'</strong>'; }).join(', ');
-          a.push({cls:'ia-warn',icon:'&#9888;',msg:dupeLabels+' '+(dupes.length===1?'was':'were')+' coded on a prior PCI visit in this encounter. PCI closes all indications — only re-select if a <em>new, distinct episode</em> is separately documented after that visit.'});
+          a.push({cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:dupeLabels+' '+(dupes.length===1?'was':'were')+' coded on a prior PCI visit in this encounter. PCI closes all indications — only re-select if a <em>new, distinct episode</em> is separately documented after that visit.'});
         }
       }
       if(v.nonisch_sel.indexOf('valv')>=0) a.push({cls:'ia-info',icon:'&#9432;','msg':'<strong>Valvular Disease:</strong> Select when evaluating severity or before valve repair/replacement/TAVR. TAVR evaluations &rarr; Valvular Disease, not Pre-Operative Evaluation.'});
@@ -2250,7 +2250,7 @@ function getSteps(idx){
         var dupes=v.noncardiac_sel.filter(function(s){ return priorSels.indexOf(s)>=0; });
         if(dupes.length>0){
           var dupeLabels=dupes.map(function(s){ return '<strong>'+(LABELS[s]||s)+'</strong>'; }).join(', ');
-          a.push({cls:'ia-warn',icon:'&#9888;',msg:dupeLabels+' '+(dupes.length===1?'was':'were')+' coded on a prior PCI visit in this encounter. PCI closes all indications — only re-select if a <em>new, distinct episode</em> is separately documented after that visit.'});
+          a.push({cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:dupeLabels+' '+(dupes.length===1?'was':'were')+' coded on a prior PCI visit in this encounter. PCI closes all indications — only re-select if a <em>new, distinct episode</em> is separately documented after that visit.'});
         }
       }
       if(v.noncardiac_sel.indexOf('preo')>=0) a.push({cls:'ia-info',icon:'&#9432;','msg':'<strong>TAVR evaluations</strong> should use <strong>Valvular Disease</strong>, not Pre-Operative Evaluation.'});
@@ -2321,7 +2321,7 @@ function sectionDivider(icon,label){
     '</div>';
 }
 function blockedNote(msg){
-  return '<div class="s-blocked"><span>&#9888;</span><span>'+msg+'</span></div>';
+  return '<div class="s-blocked"><span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg></span><span>'+msg+'</span></div>';
 }
 function skipNote(msg){
   return '<div class="s-skip"><span>&#10003;</span><span>'+msg+'</span></div>';
@@ -2421,7 +2421,7 @@ function openCard(step, idx, v, isActive){
           (def?'<span class="ind-view-def" data-action="ind-def" data-defid="'+defPanelId+'">View definition</span>':'')+
         '</span>'+
         (isBlocked&&conflictMsg?
-          '<span class="tip-conflict"><span class="tip-conflict-body"><strong>&#9888; '+conflictMsg+'</strong>'+
+          '<span class="tip-conflict"><span class="tip-conflict-body"><strong><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg> '+conflictMsg+'</strong>'+
           (conflictRationale?'<span class="tip-conflict-rationale">'+conflictRationale+'</span>':'')+'</span></span>':'');
       h+='</div>';
       if(def){
@@ -2433,7 +2433,7 @@ function openCard(step, idx, v, isActive){
     var activeConflicts=getActiveConflictMessages(v[step.id],blockInfo);
     activeConflicts.forEach(function(w){
       var lA=LABELS[w.selA]||w.selA; var lB=LABELS[w.selB]||w.selB;
-      h+=chipAlert({cls:'ia-warn',icon:'&#9888;',msg:
+      h+=chipAlert({cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:
         '<strong>Conflict: “'+lA+'” and “'+lB+'” cannot both be selected.</strong>'+
         (w.rationale?'<br><span style="font-weight:400">'+w.rationale+'</span>':'')+
         '<br><span style="font-weight:600">Deselect one of these to continue.</span>'
@@ -2464,7 +2464,7 @@ function openCard(step, idx, v, isActive){
           (def?'<span class="ind-view-def" data-action="ind-def" data-defid="'+defPanelId+'">View definition</span>':'')+
         '</span>'+
         (isBlocked&&conflictMsg?
-          '<span class="tip-conflict"><span class="tip-conflict-body"><strong>&#9888; '+conflictMsg+'</strong>'+
+          '<span class="tip-conflict"><span class="tip-conflict-body"><strong><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg> '+conflictMsg+'</strong>'+
           (conflictRationale?'<span class="tip-conflict-rationale">'+conflictRationale+'</span>':'')+'</span></span>':'');
       h+='</div>';
       if(def){
@@ -2476,7 +2476,7 @@ function openCard(step, idx, v, isActive){
     var activeConflicts2=getActiveConflictMessages(fieldArr,blockInfo2);
     activeConflicts2.forEach(function(w){
       var lA=LABELS[w.selA]||w.selA; var lB=LABELS[w.selB]||w.selB;
-      h+=chipAlert({cls:'ia-warn',icon:'&#9888;',msg:
+      h+=chipAlert({cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:
         '<strong>Conflict: “'+lA+'” and “'+lB+'” cannot both be selected.</strong>'+
         (w.rationale?'<br><span style="font-weight:400">'+w.rationale+'</span>':'')+
         '<br><span style="font-weight:600">Deselect one of these to continue.</span>'
