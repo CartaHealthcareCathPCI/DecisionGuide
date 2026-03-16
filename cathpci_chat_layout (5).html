@@ -1548,8 +1548,13 @@ function buildRulesEngine() {
     event: { type:'pci-indication', params:{ opts:['Other'], note:'Resuscitated Cardiac Arrest → PCI Indication: Other.' }}
   });
   engine.addRule({
+    name: 'pci:worsening-angina-suspected-cad',
+    conditions: { all:[{ fact:'sels', operator:'contains', value:'wora' },{ fact:'sels', operator:'contains', value:'susp' },{ fact:'sels', operator:'doesNotContain', value:'skcad' },{ fact:'hasACS', operator:'equal', value:false }]},
+    event: { type:'pci-indication', params:{ opts:['Other'], note:'Worsening Angina with Suspected CAD (unconfirmed) → PCI Indication: Other.' }}
+  });
+  engine.addRule({
     name: 'pci:worsening-angina',
-    conditions: { all:[{ fact:'sels', operator:'contains', value:'wora' },{ fact:'hasACS', operator:'equal', value:false }]},
+    conditions: { all:[{ fact:'sels', operator:'contains', value:'wora' },{ fact:'sels', operator:'doesNotContain', value:'susp' },{ fact:'hasACS', operator:'equal', value:false }]},
     event: { type:'pci-indication', params:{ opts:['Stable Angina'], note:'Worsening Angina → PCI Indication: Stable Angina.' }}
   });
   engine.addRule({
@@ -2799,7 +2804,10 @@ function getPCI(idx){
       if(v.angina_yn===false) return {opts:['CAD (without ischemic Sx)'], note:'No angina reported \u2014 CAD without ischemic symptoms is the correct PCI indication.'};
       return {opts:['Stable Angina','CAD (without ischemic Sx)'], note:'Stable Known CAD: Stable Angina if anginal symptoms present, CAD without ischemic Sx if no symptoms.', pending:true};
     }
-    if(sels.indexOf('wora')>=0) return {opts:['Stable Angina'], note:'Worsening Angina \u2192 PCI Indication: Stable Angina.'};
+    if(sels.indexOf('wora')>=0){
+      if(sels.indexOf('susp')>=0&&sels.indexOf('skcad')<0) return {opts:['Other'], note:'Worsening Angina with Suspected CAD (unconfirmed) \u2192 PCI Indication: Other.'};
+      return {opts:['Stable Angina'], note:'Worsening Angina \u2192 PCI Indication: Stable Angina.'};
+    }
     if(sels.indexOf('noa')>=0)  return {opts:['New Onset Angina \u226422 months'], note:'New Onset Angina \u226422 months \u2192 PCI Indication: New Onset Angina \u226422 months.'};
     if(sels.indexOf('rca')>=0)  return {opts:['Other'], note:'Resuscitated Cardiac Arrest \u2192 PCI Indication: Other.'};
     if(hasOther) return {opts:['Other'], note:'Non-coronary/structural/evaluation indications \u2192 PCI Indication: Other.'};
