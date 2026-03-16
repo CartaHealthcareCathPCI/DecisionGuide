@@ -2721,8 +2721,8 @@ function getSels(idx){
     // angina_worse===false does not confirm skcad — requires documented CAD in CAD History
   }
   if(v.cad_hx===true&&v.cad_stable===true) s.push('skcad');
-  // Also derive skcad when angina pathway determined stable (angina_worse===false)
-  if(v.angina_worse===false&&s.indexOf('skcad')<0) s.push('skcad');
+  // Also derive skcad when angina pathway determined stable (angina_worse===false) AND CAD is documented
+  if(v.angina_worse===false&&v.cad_hx===true&&s.indexOf('skcad')<0) s.push('skcad');
   if(v.arrest_yn===true) s.push('rca');
   // Suspected CAD can be answered inline (susp_yn) or via the dedicated section (susp_sel)
   if(v.susp_yn===true&&s.indexOf('susp')<0) s.push('susp');
@@ -2754,35 +2754,38 @@ function getPCI(idx){
     if(!v.acs_timing) return {opts:['NSTE\u2013ACS'],note:'Answer the ACS timing question to confirm indication.',pending:true};
   }
 
-  // Build facts object for rules engine
-  var facts = {
-    acsChoice: acsChoice||'none',
-    sels: sels,
-    hasACS: hasACS,
-    hasOther: hasOther,
-    stemi_lytics: v.stemi_lytics,
-    stemi_lytics_success: v.stemi_lytics_success,
-    stemi_immediate: v.stemi_immediate,
-    stemi_sx_dur: v.stemi_sx_dur,
-    stemi_unstable: v.stemi_unstable
-  };
-
-  // Run engine — highest-priority matching rule wins
-  // Fallback: if engine unavailable (CDN blocked), derive directly from facts
-  var matched = runEngineSync(facts, 'pci-indication');
-  if(!matched.length && isACS){
-    var _fb={stemi:'STEMI',nstemi:'NSTE–ACS',ua:'NSTE–ACS'};
-    if(_fb[acsChoice]) matched=[{opts:[_fb[acsChoice]],note:''}];
+  // Derive PCI indication directly (synchronous, no rules engine dependency)
+  // ACS indications
+  if(acsChoice==='nstemi'||acsChoice==='ua'){
+    return {opts:['NSTE\u2013ACS'], note:'NSTEMI/Unstable Angina maps to NSTE\u2013ACS. Note: NSTEMI is only applicable when diagnosed \u22647 days prior to PCI.'};
   }
-  if(matched.length>0){
-    var result = matched[0]; // Engine returns highest-priority first
-    // Stable Known CAD: refine based on angina answer
-    if(result.needsAnginaCheck){
-      if(v.angina_yn===true)  return {opts:['Stable Angina'],note:'Patient reported angina — Stable Angina is the correct PCI indication.'};
-      if(v.angina_yn===false) return {opts:['CAD (without ischemic Sx)'],note:'No angina reported — CAD without ischemic symptoms is the correct PCI indication.'};
-      return {opts:result.opts, note:result.note, pending:true};
+  if(acsChoice==='stemi'){
+    if(v.stemi_lytics===true&&v.stemi_lytics_success===true)
+      return {opts:['STEMI (after successful lytics)'], note:'PCI after full-dose thrombolysis with resolution of symptoms and ST changes \u2014 pharmacoinvasive strategy.'};
+    if(v.stemi_lytics===true&&v.stemi_lytics_success===false)
+      return {opts:['STEMI \u2013 Rescue (after unsuccessful lytics)'], note:'Rescue PCI after failed full-dose thrombolysis for persistent/recurrent ischemia, heart failure, or electrical instability.'};
+    if(v.stemi_lytics===false&&v.stemi_immediate===true)
+      return {opts:['STEMI \u2013 Immediate PCI for Acute STEMI'], note:'PCI performed emergently without delay after diagnosis. Includes unstable presentations \u226412 hours.'};
+    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='lte12'&&v.stemi_unstable===true)
+      return {opts:['STEMI \u2013 Unstable (\u226412 hrs from Sx)'], note:'Recurrent/persistent ischemia, heart failure, or ventricular arrhythmia present within \u226412 hours of symptom onset.'};
+    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='lte12'&&v.stemi_unstable===false)
+      return {opts:['STEMI \u2013 Stable (\u226412 hrs from Sx)'], note:'No recurrent ischemia, heart failure, or electrical instability. Symptom onset \u226412 hours before PCI.'};
+    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='gt12'&&v.stemi_unstable===true)
+      return {opts:['STEMI \u2013 Unstable (>12 hrs from Sx)'], note:'Recurrent/persistent ischemia, heart failure, or ventricular arrhythmia present more than 12 hours after symptom onset.'};
+    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='gt12'&&v.stemi_unstable===false)
+      return {opts:['STEMI \u2013 Stable (>12 hrs from Sx)'], note:'No recurrent ischemia, heart failure, or electrical instability. Symptom onset >12 hours before PCI.'};
+  }
+  // Non-ACS indications
+  if(!hasACS){
+    if(sels.indexOf('skcad')>=0){
+      if(v.angina_yn===true)  return {opts:['Stable Angina'], note:'Patient reported angina \u2014 Stable Angina is the correct PCI indication.'};
+      if(v.angina_yn===false) return {opts:['CAD (without ischemic Sx)'], note:'No angina reported \u2014 CAD without ischemic symptoms is the correct PCI indication.'};
+      return {opts:['Stable Angina','CAD (without ischemic Sx)'], note:'Stable Known CAD: Stable Angina if anginal symptoms present, CAD without ischemic Sx if no symptoms.', pending:true};
     }
-    return {opts:result.opts, note:result.note};
+    if(sels.indexOf('wora')>=0) return {opts:['Stable Angina'], note:'Worsening Angina \u2192 PCI Indication: Stable Angina.'};
+    if(sels.indexOf('noa')>=0)  return {opts:['New Onset Angina \u226422 months'], note:'New Onset Angina \u226422 months \u2192 PCI Indication: New Onset Angina \u226422 months.'};
+    if(sels.indexOf('rca')>=0)  return {opts:['Other'], note:'Resuscitated Cardiac Arrest \u2192 PCI Indication: Other.'};
+    if(hasOther) return {opts:['Other'], note:'Non-coronary/structural/evaluation indications \u2192 PCI Indication: Other.'};
   }
   return null;
 }
