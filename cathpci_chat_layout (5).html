@@ -1879,14 +1879,22 @@ function getSteps(idx){
 
     // Prior visit had ACS — ask if a new ACS episode occurred before gating ACS
     if(!isFirst && priorVisitHadACS(idx) && v.staged!==true){
+      // Find the last prior PCI visit that had ACS (Diagnostic Only visits do not close ACS)
       var prevIdx=idx-1;
+      for(var _pi=idx-1;_pi>=0;_pi--){
+        if(S.visits[_pi].caseType==='pci'){
+          var _ps=getSels(_pi);
+          if(_ps.indexOf('acs24')>=0||_ps.indexOf('acsgt')>=0){prevIdx=_pi; break;}
+        }
+      }
       var prevAcsSels=getSels(prevIdx).filter(function(s){return s==='acs24'||s==='acsgt';});
       var prevAcsLabel=prevAcsSels.indexOf('acs24')>=0?'ACS ≤24 hrs':(prevAcsSels.indexOf('acsgt')>=0?'ACS >24 hrs':'ACS');
+      var prevVisitNum=prevIdx+1;
       steps.push({
         id:'newAcsEpisode',
-        q:'Did the patient have a new ACS episode after Visit '+(idx)+'?',
+        q:'Did the patient have a new ACS episode after Visit '+prevVisitNum+'?',
         hint:'The prior ACS event is closed after PCI. A new episode requires separate documentation: new symptoms, new ECG changes, or new troponin elevation occurring after the prior PCI.',
-        chipLabel:'New ACS episode since Visit '+idx+'?',
+        chipLabel:'New ACS episode since Visit '+prevVisitNum+'?',
         type:'yn',
         opts:[
           {val:true, lbl:'Yes — new, documented ACS episode'},
@@ -1896,7 +1904,7 @@ function getSteps(idx){
         chipAnswer:function(v){ return v.newAcsEpisode?'Yes — New ACS episode':'No — ACS not re-applicable'; },
         chipAlert:function(v){
           if(v.newAcsEpisode===true) return {cls:'ia-ok',icon:'&#10003;',msg:'New ACS episode confirmed — ACS indications are available for this visit.'};
-          if(v.newAcsEpisode===false) return {cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:'<strong>ACS is not re-applicable.</strong> The prior ACS event closed at Visit '+idx+'. Code the current indication (typically <strong>Stable Known CAD</strong> for a staged/planned follow-up).'};
+          if(v.newAcsEpisode===false) return {cls:'ia-warn',icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 88" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em"><polygon points="50,82 4,6 96,6" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><text x="50" y="68" text-anchor="middle" font-size="48" font-weight="900" fill="currentColor">!</text></svg>',msg:'<strong>ACS is not re-applicable.</strong> The prior ACS event closed at Visit '+prevVisitNum+'. Code the current indication (typically <strong>Stable Known CAD</strong> for a staged/planned follow-up).'};
           return null;
         }
       });
@@ -1911,7 +1919,14 @@ function getSteps(idx){
     var acsBlockReason='ACS indications are not available for this visit.';
     if(v.staged===true) acsBlockReason='<strong>Staged PCI:</strong> The prior ACS event is closed. Code the current stable indication — typically <strong>Stable Known CAD</strong> — unless new acute symptoms are documented.';
 
-    else if(priorVisitHadACS(idx)&&v.newAcsEpisode===false) acsBlockReason='<strong>Prior ACS event is closed.</strong> No new ACS episode was documented after Visit '+(idx)+'. Code the current indication \u2014 typically <strong>Stable Known CAD</strong>.';
+    else if(priorVisitHadACS(idx)&&v.newAcsEpisode===false){
+      // Find the last prior PCI visit with ACS for the correct visit number in the message
+      var _lastPCIACSNum=idx;
+      for(var _pi2=idx-1;_pi2>=0;_pi2--){
+        if(S.visits[_pi2].caseType==='pci'){var _ps2=getSels(_pi2);if(_ps2.indexOf('acs24')>=0||_ps2.indexOf('acsgt')>=0){_lastPCIACSNum=_pi2+1;break;}}
+      }
+      acsBlockReason='<strong>Prior ACS event is closed.</strong> No new ACS episode was documented after Visit '+_lastPCIACSNum+'. Code the current indication \u2014 typically <strong>Stable Known CAD</strong>.';
+    }
     steps.push({blocked:true, blockedMsg:acsBlockReason});
   } else {
     // Single exclusive ACS type selection
@@ -2627,7 +2642,9 @@ function reopenStep(visitIdx, stepI){
    CONTEXT / LOGIC HELPERS
 ══════════════════════════════════════════ */
 function priorVisitHadACS(idx){
+  // ACS is only "closed" after a PCI visit — Diagnostic Only visits do not close ACS
   for(var i=0;i<idx;i++){
+    if(S.visits[i].caseType!=='pci') continue;
     var ps=getSels(i);
     if(ps.indexOf('acs24')>=0||ps.indexOf('acsgt')>=0) return true;
   }
