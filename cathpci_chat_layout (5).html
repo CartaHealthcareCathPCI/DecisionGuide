@@ -2561,7 +2561,7 @@ function reducer(visit, action) {
       } else {
         v[field] = next;
         // Downstream cascades — all in one place
-        if(field==='acs_timing')   v = _clearSTEMI(v);
+        if(field==='acs_timing')   { v.stemi_lytics=null; v.stemi_lytics_success=null; v.stemi_immediate=null; v.stemi_sx_dur=null; v.stemi_unstable=null; }
         if(field==='stemi_lytics') { v.stemi_lytics_success=null; v.stemi_immediate=null; v.stemi_sx_dur=null; v.stemi_unstable=null; }
         if(field==='stemi_immediate') { v.stemi_sx_dur=null; v.stemi_unstable=null; }
         if(field==='stemi_sx_dur')    { v.stemi_unstable=null; }
