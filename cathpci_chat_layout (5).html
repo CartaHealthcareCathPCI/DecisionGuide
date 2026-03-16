@@ -2012,53 +2012,73 @@ function getSteps(idx){
         }
 
         if(v.stemi_lytics===false){
-          // Q2b: Was PCI immediate after diagnosis?
-          steps.push({
-            id:'stemi_immediate',
-            q:'Was the PCI performed immediately after STEMI diagnosis?',
-            hint:'Immediate means emergently, without any delay after diagnosis — even if symptoms were ≤12 hours. If there was any delay between diagnosis and starting the PCI, select No.',
-            chipLabel:'Immediate PCI?',
-            type:'yn',
-            opts:[
-              {val:true,  lbl:'Yes \u2014 emergent, no delay after diagnosis'},
-              {val:false, lbl:'No \u2014 there was a delay after diagnosis'}
-            ],
-            getAnswer:function(v){ return v.stemi_immediate; },
-            chipAnswer:function(v){ return v.stemi_immediate?'Immediate: Yes':'Immediate: No'; }
-          });
-
-          if(v.stemi_immediate===false){
-            // Q3: Symptom duration
+          if(v.acs_timing==='lte24'){
+            // Q2b: Was PCI immediate after diagnosis? (only applicable for ACS ≤24 hrs)
             steps.push({
-              id:'stemi_sx_dur',
-              q:'How long had symptoms been present at the time of PCI?',
-              hint:'Measure from <strong>symptom onset</strong> to the time PCI was performed.',
-              chipLabel:'Symptom duration',
+              id:'stemi_immediate',
+              q:'Was the PCI performed immediately after STEMI diagnosis?',
+              hint:'Immediate means emergently, without any delay after diagnosis — even if symptoms were ≤12 hours. If there was any delay between diagnosis and starting the PCI, select No.',
+              chipLabel:'Immediate PCI?',
               type:'yn',
               opts:[
-                {val:'lte12', lbl:'\u226412 hours from symptom onset'},
-                {val:'gt12',  lbl:'>12 hours from symptom onset'}
+                {val:true,  lbl:'Yes \u2014 emergent, no delay after diagnosis'},
+                {val:false, lbl:'No \u2014 there was a delay after diagnosis'}
               ],
-              getAnswer:function(v){ return v.stemi_sx_dur; },
-              chipAnswer:function(v){ return v.stemi_sx_dur==='lte12'?'\u226412 hrs':'>12 hrs'; }
+              getAnswer:function(v){ return v.stemi_immediate; },
+              chipAnswer:function(v){ return v.stemi_immediate?'Immediate: Yes':'Immediate: No'; }
             });
 
-            // Q4: Stability (only if sx > 12 hrs OR symptoms present)
-            if(v.stemi_sx_dur!==null){
+            if(v.stemi_immediate===false){
+              // Q3: Symptom duration
               steps.push({
-                id:'stemi_unstable',
-                q:'At the time of PCI, was the patient experiencing any of the following?',
-                hint:'Recurrent or persistent ischemia &nbsp;•&nbsp; Heart failure signs or symptoms &nbsp;•&nbsp; Ventricular arrhythmia',
-                chipLabel:'Instability?',
+                id:'stemi_sx_dur',
+                q:'How long had symptoms been present at the time of PCI?',
+                hint:'Measure from <strong>symptom onset</strong> to the time PCI was performed.',
+                chipLabel:'Symptom duration',
                 type:'yn',
                 opts:[
-                  {val:true,  lbl:'Yes \u2014 one or more of the above present (Unstable)'},
-                  {val:false, lbl:'No \u2014 none present (Stable)'}
+                  {val:'lte12', lbl:'\u226412 hours from symptom onset'},
+                  {val:'gt12',  lbl:'>12 hours from symptom onset'}
                 ],
-                getAnswer:function(v){ return v.stemi_unstable; },
-                chipAnswer:function(v){ return v.stemi_unstable?'Unstable':'Stable'; }
+                getAnswer:function(v){ return v.stemi_sx_dur; },
+                chipAnswer:function(v){ return v.stemi_sx_dur==='lte12'?'\u226412 hrs':'>12 hrs'; }
               });
+
+              // Q4: Stability
+              if(v.stemi_sx_dur!==null){
+                steps.push({
+                  id:'stemi_unstable',
+                  q:'At the time of PCI, was the patient experiencing any of the following?',
+                  hint:'Recurrent or persistent ischemia &nbsp;•&nbsp; Heart failure signs or symptoms &nbsp;•&nbsp; Ventricular arrhythmia',
+                  chipLabel:'Instability?',
+                  type:'yn',
+                  opts:[
+                    {val:true,  lbl:'Yes \u2014 one or more of the above present (Unstable)'},
+                    {val:false, lbl:'No \u2014 none present (Stable)'}
+                  ],
+                  getAnswer:function(v){ return v.stemi_unstable; },
+                  chipAnswer:function(v){ return v.stemi_unstable?'Unstable':'Stable'; }
+                });
+              }
             }
+          }
+
+          if(v.acs_timing==='gt24'){
+            // For ACS >24 hrs: Immediate PCI and ≤12 hrs symptom options are not applicable.
+            // Symptom duration is implied >12 hrs. Ask only about stability.
+            steps.push({
+              id:'stemi_unstable',
+              q:'At the time of PCI, was the patient experiencing any of the following?',
+              hint:'Recurrent or persistent ischemia &nbsp;•&nbsp; Heart failure signs or symptoms &nbsp;•&nbsp; Ventricular arrhythmia',
+              chipLabel:'Instability?',
+              type:'yn',
+              opts:[
+                {val:true,  lbl:'Yes \u2014 one or more of the above present (Unstable)'},
+                {val:false, lbl:'No \u2014 none present (Stable)'}
+              ],
+              getAnswer:function(v){ return v.stemi_unstable; },
+              chipAnswer:function(v){ return v.stemi_unstable?'Unstable':'Stable'; }
+            });
           }
         }
       }
@@ -2768,9 +2788,18 @@ function getPCI(idx){
     if(!v.acs_timing) return {opts:['STEMI'],note:'Answer the ACS timing question, then the STEMI detail questions for a specific indication.',pending:true};
     if(v.stemi_lytics===null) return {opts:['STEMI'],note:'Answer the STEMI detail questions for a specific PCI indication.',pending:true};
     if(v.stemi_lytics===true&&v.stemi_lytics_success===null) return {opts:['STEMI'],note:'Answer whether thrombolytics were successful.',pending:true};
-    if(v.stemi_lytics===false&&v.stemi_immediate===null) return {opts:['STEMI'],note:'Answer whether PCI was performed immediately after diagnosis.',pending:true};
-    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur===null) return {opts:['STEMI'],note:'Answer the symptom duration question.',pending:true};
-    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur!==null&&v.stemi_unstable===null) return {opts:['STEMI'],note:'Answer the stability question.',pending:true};
+    if(v.stemi_lytics===false){
+      if(v.acs_timing==='lte24'){
+        // ACS ≤24 hrs: need immediate, sx_dur, and stability answers
+        if(v.stemi_immediate===null) return {opts:['STEMI'],note:'Answer whether PCI was performed immediately after diagnosis.',pending:true};
+        if(v.stemi_immediate===false&&v.stemi_sx_dur===null) return {opts:['STEMI'],note:'Answer the symptom duration question.',pending:true};
+        if(v.stemi_immediate===false&&v.stemi_sx_dur!==null&&v.stemi_unstable===null) return {opts:['STEMI'],note:'Answer the stability question.',pending:true};
+      }
+      if(v.acs_timing==='gt24'){
+        // ACS >24 hrs: immediate PCI and ≤12 hrs not applicable — need only stability answer
+        if(v.stemi_unstable===null) return {opts:['STEMI'],note:'Answer the stability question.',pending:true};
+      }
+    }
   }
   if(acsChoice==='nstemi'||acsChoice==='ua'){
     if(!v.acs_timing) return {opts:['NSTE\u2013ACS'],note:'Answer the ACS timing question to confirm indication.',pending:true};
@@ -2786,31 +2815,50 @@ function getPCI(idx){
       return {opts:['STEMI (after successful lytics)'], note:'PCI after full-dose thrombolysis with resolution of symptoms and ST changes \u2014 pharmacoinvasive strategy.'};
     if(v.stemi_lytics===true&&v.stemi_lytics_success===false)
       return {opts:['STEMI \u2013 Rescue (after unsuccessful lytics)'], note:'Rescue PCI after failed full-dose thrombolysis for persistent/recurrent ischemia, heart failure, or electrical instability.'};
-    if(v.stemi_lytics===false&&v.stemi_immediate===true)
-      return {opts:['STEMI \u2013 Immediate PCI for Acute STEMI'], note:'PCI performed emergently without delay after diagnosis. Includes unstable presentations \u226412 hours.'};
-    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='lte12'&&v.stemi_unstable===true)
-      return {opts:['STEMI \u2013 Unstable (\u226412 hrs from Sx)'], note:'Recurrent/persistent ischemia, heart failure, or ventricular arrhythmia present within \u226412 hours of symptom onset.'};
-    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='lte12'&&v.stemi_unstable===false)
-      return {opts:['STEMI \u2013 Stable (\u226412 hrs from Sx)'], note:'No recurrent ischemia, heart failure, or electrical instability. Symptom onset \u226412 hours before PCI.'};
-    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='gt12'&&v.stemi_unstable===true)
-      return {opts:['STEMI \u2013 Unstable (>12 hrs from Sx)'], note:'Recurrent/persistent ischemia, heart failure, or ventricular arrhythmia present more than 12 hours after symptom onset.'};
-    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='gt12'&&v.stemi_unstable===false)
-      return {opts:['STEMI \u2013 Stable (>12 hrs from Sx)'], note:'No recurrent ischemia, heart failure, or electrical instability. Symptom onset >12 hours before PCI.'};
+    // ACS ≤24 hrs: Immediate PCI and ≤12 hrs symptom options are applicable
+    if(v.acs_timing==='lte24'){
+      if(v.stemi_lytics===false&&v.stemi_immediate===true)
+        return {opts:['STEMI \u2013 Immediate PCI for Acute STEMI'], note:'PCI performed emergently without delay after diagnosis. Includes unstable presentations \u226412 hours.'};
+      if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='lte12'&&v.stemi_unstable===true)
+        return {opts:['STEMI \u2013 Unstable (\u226412 hrs from Sx)'], note:'Recurrent/persistent ischemia, heart failure, or ventricular arrhythmia present within \u226412 hours of symptom onset.'};
+      if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='lte12'&&v.stemi_unstable===false)
+        return {opts:['STEMI \u2013 Stable (\u226412 hrs from Sx)'], note:'No recurrent ischemia, heart failure, or electrical instability. Symptom onset \u226412 hours before PCI.'};
+      if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='gt12'&&v.stemi_unstable===true)
+        return {opts:['STEMI \u2013 Unstable (>12 hrs from Sx)'], note:'Recurrent/persistent ischemia, heart failure, or ventricular arrhythmia present more than 12 hours after symptom onset.'};
+      if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur==='gt12'&&v.stemi_unstable===false)
+        return {opts:['STEMI \u2013 Stable (>12 hrs from Sx)'], note:'No recurrent ischemia, heart failure, or electrical instability. Symptom onset >12 hours before PCI.'};
+    }
+    // ACS >24 hrs: Immediate PCI and ≤12 hrs options not applicable — symptom duration implied >12 hrs
+    if(v.acs_timing==='gt24'){
+      if(v.stemi_lytics===false&&v.stemi_unstable===true)
+        return {opts:['STEMI \u2013 Unstable (>12 hrs from Sx)'], note:'Recurrent/persistent ischemia, heart failure, or ventricular arrhythmia present more than 12 hours after symptom onset.'};
+      if(v.stemi_lytics===false&&v.stemi_unstable===false)
+        return {opts:['STEMI \u2013 Stable (>12 hrs from Sx)'], note:'No recurrent ischemia, heart failure, or electrical instability. Symptom onset >12 hours before PCI.'};
+    }
   }
-  // Non-ACS indications
+  // Non-ACS indications — priority order per guide hierarchy
   if(!hasACS){
-    if(sels.indexOf('skcad')>=0){
-      if(v.angina_yn===true)  return {opts:['Stable Angina'], note:'Patient reported angina \u2014 Stable Angina is the correct PCI indication.'};
-      if(v.angina_yn===false) return {opts:['CAD (without ischemic Sx)'], note:'No angina reported \u2014 CAD without ischemic symptoms is the correct PCI indication.'};
+    // Priority 3: New Onset Angina ≤2 months (highest non-ACS priority)
+    if(sels.indexOf('noa')>=0)
+      return {opts:['New Onset Angina \u22642 months'], note:'New Onset Angina \u22642 months \u2192 PCI Indication: New Onset Angina \u22642 months.'};
+    // Priority 3: Stable Angina — from Stable Known CAD or Suspected CAD with ischemic symptoms
+    if((sels.indexOf('skcad')>=0||sels.indexOf('susp')>=0)&&v.angina_yn===true)
+      return {opts:['Stable Angina'], note:'Patient reported angina \u2014 Stable Angina is the correct PCI indication.'};
+    // Pending: Stable Known CAD but angina not yet answered
+    if(sels.indexOf('skcad')>=0&&v.angina_yn===null)
       return {opts:['Stable Angina','CAD (without ischemic Sx)'], note:'Stable Known CAD: Stable Angina if anginal symptoms present, CAD without ischemic Sx if no symptoms.', pending:true};
-    }
-    if(sels.indexOf('wora')>=0){
-      if(sels.indexOf('susp')>=0&&sels.indexOf('skcad')<0) return {opts:['Other'], note:'Worsening Angina with Suspected CAD (unconfirmed) \u2192 PCI Indication: Other.'};
-      return {opts:['Stable Angina'], note:'Worsening Angina \u2192 PCI Indication: Stable Angina.'};
-    }
-    if(sels.indexOf('noa')>=0)  return {opts:['New Onset Angina \u226422 months'], note:'New Onset Angina \u226422 months \u2192 PCI Indication: New Onset Angina \u226422 months.'};
-    if(sels.indexOf('rca')>=0)  return {opts:['Other'], note:'Resuscitated Cardiac Arrest \u2192 PCI Indication: Other.'};
-    if(hasOther) return {opts:['Other'], note:'Non-coronary/structural/evaluation indications \u2192 PCI Indication: Other.'};
+    // Priority 4: CAD without ischemic symptoms — Stable Known CAD with no angina
+    if(sels.indexOf('skcad')>=0&&v.angina_yn===false)
+      return {opts:['CAD (without ischemic Sx)'], note:'No angina reported \u2014 CAD without ischemic symptoms is the correct PCI indication.'};
+    // Priority 5: Other — Worsening Angina, Resuscitated Cardiac Arrest, Suspected CAD without symptoms, other conditions
+    if(sels.indexOf('wora')>=0)
+      return {opts:['Other'], note:'Worsening Angina \u2192 PCI Indication: Other.'};
+    if(sels.indexOf('rca')>=0)
+      return {opts:['Other'], note:'Resuscitated Cardiac Arrest \u2192 PCI Indication: Other.'};
+    if(sels.indexOf('susp')>=0)
+      return {opts:['Other'], note:'Suspected CAD without ischemic symptoms \u2192 PCI Indication: Other.'};
+    if(hasOther)
+      return {opts:['Other'], note:'Non-coronary/structural/evaluation indications \u2192 PCI Indication: Other.'};
   }
   return null;
 }
