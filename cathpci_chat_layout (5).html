@@ -1,0 +1,2873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CathPCI — Indication Decision Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Semi+Condensed:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── CLINICAL LIGHT THEME ── */
+:root {
+  /* Carta Healthcare brand palette — white background */
+  --navy:    #013349;   /* Night-Shift Teal */
+  --navy-md: #074F71;   /* Data-Lake Blue */
+  --blue:    #074F71;
+  --blue-lt: #E6F3F7;
+  --teal:    #00AEC7;   /* Navigator Cyan */
+  --teal-lt: #E0F8FC;
+  --slate:   #3A5060;
+  --rule:    #DDE6EB;
+  --rule-dk: #B8CDD6;
+  --bg:      #F5F8FA;
+  --bg-card: #FFFFFF;
+  --bg-panel:#EDF3F6;
+  --text:    #0A1F2E;
+  --text-md: #2C4A5A;
+  --text-lt: #5A7A8A;
+  --text-dim:#8AAAB8;
+  --green:   #0D6B3A;
+  --green-lt:#E6F7F0;
+  --green-bd:#5EC9A0;
+  --amber:   #A0510A;
+  --amber-lt:#FFF4E6;
+  --amber-bd:#F5B870;
+  --red:     #B8200A;
+  --red-lt:  #FDECEA;
+  --red-bd:  #F5A088;
+  --orange:  #FF6720;   /* Vitality Orange */
+  --ora-lt:  #FFF0E8;
+  --ora-bd:  #FFAA78;
+
+  --acs-accent:    #BE531C;
+  --angina-accent: #BE531C;
+  --cad-accent:    #BE531C;
+  --arrest-accent: #BE531C;
+  --struct-accent: #BE531C;
+  --eval-accent:   #BE531C;
+  --susp-accent:   #BE531C;
+  --other-accent:  #BE531C;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+
+body {
+  font-family: 'DM Sans', 'Helvetica Neue', Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ─── HEADER ─── */
+.hdr {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 56px;
+  background: linear-gradient(135deg, #013349 0%, #074F71 75%, #00AEC7 100%);
+  display: flex; align-items: center;
+  padding: 0 24px; gap: 16px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 4px 16px rgba(30,27,75,0.3);
+}
+.hdr-logo { display: flex; align-items: center; gap: 10px; }
+.hdr-logo svg { width: 22px; height: 22px; flex-shrink: 0; }
+.hdr-brand {
+  font-family: 'Barlow Semi Condensed', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+.hdr-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }
+.hdr-title {
+  font-family: 'Barlow Semi Condensed', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+.hdr-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.hdr-badge {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 3px;
+}
+.hdr-reset {
+  padding: 5px 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px; background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.hdr-reset:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* ─── VISIT TAB BAR ─── */
+.visit-bar {
+  position: fixed; top: 56px; left: 0; right: 0; z-index: 150;
+  background: #fff;
+  border-bottom: 2px solid var(--rule);
+  display: none; align-items: center;
+  padding: 0 24px; gap: 0;
+  height: 48px; overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.visit-bar.on { display: flex; }
+.vb-tab {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 18px; height: 46px;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer; transition: all .15s;
+  white-space: nowrap; flex-shrink: 0;
+  font-size: 12px; font-weight: 600; color: var(--text-lt);
+  letter-spacing: 0.1px;
+}
+.vb-tab:hover { color: var(--slate); }
+.vb-tab.on { color: var(--navy); border-bottom-color: var(--teal); font-weight: 700; }
+.vb-tab.done { color: var(--text-md); }
+.vb-tab.done.on { color: var(--navy); }
+.vb-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--rule-dk); transition: background .15s;
+}
+.vb-tab.on .vb-dot { background: var(--teal); }
+.vb-tab.done .vb-dot { background: var(--green); }
+.vb-tab.done.on .vb-dot { background: var(--teal); }
+.vb-add {
+  padding: 0 14px; height: 46px;
+  border: none; background: transparent;
+  color: var(--text-dim); font-size: 20px; font-weight: 300;
+  cursor: pointer; transition: color .15s; flex-shrink: 0;
+  display: flex; align-items: center;
+}
+.vb-add:hover { color: var(--navy); }
+.vb-sep { width: 1px; height: 20px; background: var(--rule); margin: 0 4px; flex-shrink: 0; }
+
+/* ─── MAIN AREA ─── */
+.main {
+  padding-top: 56px;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+.main.with-vbar { padding-top: 102px; }
+
+/* ─── GUIDE LAYOUT (thread + sidebar) ─── */
+.guide-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  flex: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 0 80px;
+}
+.guide-thread {
+  flex: 1;
+  min-width: 0;
+}
+.sel-sidebar {
+  width: 288px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 112px;
+  align-self: flex-start;
+  margin: 28px 16px 0 0;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(1,51,73,0.1), 0 1px 4px rgba(0,0,0,0.06);
+  display: none;
+  border: 1px solid rgba(0,174,199,0.15);
+}
+.sel-sidebar.on { display: block; }
+.ss-head {
+  padding: 13px 16px 11px;
+  border-bottom: 1px solid var(--rule);
+  background: linear-gradient(135deg, #013349 0%, #074F71 100%);
+}
+.ss-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+}
+.ss-body { padding: 12px 14px 16px; background: var(--bg-card); }
+.ss-visit {
+  margin-bottom: 12px;
+}
+.ss-visit:last-child { margin-bottom: 0; }
+.ss-visit-label {
+  font-size: 10px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  color: #013349;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+.ss-chips { display: flex; flex-direction: column; gap: 3px; }
+.ss-chip {
+  font-size: 11px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: #00AEC7;
+  background: #013349;
+  border: 1px solid rgba(0,174,199,0.3);
+  border-radius: 4px;
+  padding: 3px 7px;
+  line-height: 1.4;
+}
+.ss-empty {
+  font-size: 11px; color: #074F71;
+  font-style: italic;
+  font-family: 'DM Sans', sans-serif;
+}
+.ss-section-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: #074F71;
+  margin: 8px 0 4px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--rule);
+}
+.ss-ind-tag {
+  display: inline-block;
+  font-size: 10.5px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--navy);
+  background: var(--blue-lt);
+  border: 1px solid #B3CCEE;
+  border-radius: 6px;
+  padding: 3px 8px;
+  margin: 1px 2px 1px 0;
+  line-height: 1.5;
+}
+.ss-pci-tag {
+  display: inline-block;
+  font-size: 10.5px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--orange);
+  background: var(--ora-lt);
+  border: 1px solid rgba(202,54,4,0.2);
+  border-radius: 6px;
+  padding: 3px 8px;
+  margin: 1px 2px 1px 0;
+  line-height: 1.5;
+}
+.ss-pci-pending {
+  display: inline-block;
+  font-size: 10.5px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: #F5A623;
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin: 1px 2px 1px 0;
+  line-height: 1.5;
+  font-style: italic;
+}
+.ss-warn-tag {
+  display: inline-block;
+  font-size: 10.5px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--amber);
+  background: rgba(245,166,35,0.12);
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: 6px;
+  padding: 3px 8px;
+  margin: 1px 0;
+  line-height: 1.5;
+}
+.ss-visit-active {
+  border-left: 3px solid var(--teal);
+  padding-left: 8px;
+  margin-left: -8px;
+}
+.ss-footer {
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--rule);
+}
+.ss-gen-btn {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--navy);
+  color: #fff; border: none; border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: background .15s;
+  letter-spacing: -0.1px;
+}
+.ss-gen-btn:hover { background: var(--navy-md); }
+@media (max-width: 800px) {
+  .sel-sidebar { display: none !important; }
+}
+
+/* ─── WELCOME SCREEN ─── */
+.welcome {
+  flex: 1; display: flex;
+  align-items: center; justify-content: center;
+  padding: 48px 24px;
+  min-height: calc(100vh - 56px);
+}
+.wc-inner { max-width: 520px; width: 100%; }
+
+.wc-emblem {
+  width: 56px; height: 56px; margin-bottom: 24px;
+}
+.wc-emblem svg { width: 56px; height: 56px; }
+
+.wc-title {
+  font-family: 'Barlow Semi Condensed', sans-serif;
+  font-size: 28px; font-weight: 700; color: #013349; letter-spacing: 0.2px;
+  letter-spacing: -0.5px; margin-bottom: 10px; line-height: 1.25;
+}
+.wc-sub {
+  font-size: 14px; color: var(--text-lt); line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+.wc-prompt {
+  font-size: 11px; font-weight: 700; color: #013349;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.wc-count-row {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 0;
+}
+.wc-count-btn {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 18px 28px; gap: 4px;
+  border: 1.5px solid var(--rule);
+  border-radius: 8px; background: var(--bg-card);
+  cursor: pointer; transition: all .2s; color: var(--text-md);
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.wc-count-btn:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+  box-shadow: 0 4px 16px rgba(11,37,69,0.12);
+  transform: translateY(-2px);
+}
+.wc-count-btn .num { font-size: 26px; font-weight: 700; line-height: 1; color: inherit; }
+.wc-count-btn .lbl { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #013349; }
+
+.wc-step2 { display: none; }
+.wc-step2.on { display: block; }
+.wc-step1-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.wc-step1-chip {
+  padding: 5px 14px; border-radius: 20px;
+  background: var(--blue-lt); border: 1px solid #B3CCEE;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500;
+  color: var(--blue); letter-spacing: 0.3px;
+}
+.wc-visits-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.wc-visit-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: #fff;
+  border: 1.5px solid var(--rule);
+  border-radius: 8px; padding: 12px 16px;
+  transition: border-color .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.wc-def-panel { flex-basis: 100%; margin-top: 2px; }
+.wc-visit-row.configured { border-color: rgba(0,174,199,0.4); background: rgba(0,174,199,0.06); }
+.wc-vr-num {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--bg-panel); border: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--text-md);
+  flex-shrink: 0;
+}
+.wc-vr-label { font-size: 13px; font-weight: 600; color: var(--text-md); flex: 1; }
+.wc-type-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.wc-type-btn {
+  padding: 7px 14px;
+  border: 1.5px solid var(--rule);
+  border-radius: 6px; background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600;
+  color: var(--text-md); cursor: pointer;
+  transition: all .15s;
+  position: relative;
+}
+.wc-type-btn:hover { border-color: var(--navy); color: var(--navy); }
+.wc-type-btn.on-diag { background: var(--teal-lt); border-color: var(--teal); color: var(--navy); }
+.wc-type-btn.on-pci  { background: rgba(255,103,32,0.08); border-color: var(--orange); color: #BE531C; }
+/* Hover tooltip for setup page buttons */
+.wc-type-btn .wc-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%; transform: translateX(-50%);
+  width: 260px; max-width: 90vw;
+  background: var(--navy);
+  border-radius: 6px;
+  padding: 12px 14px;
+  z-index: 600;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+  pointer-events: none;
+  text-align: left;
+  white-space: normal;
+  font-weight: 400;
+}
+.wc-type-btn .wc-tip::after {
+  content: '';
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--navy);
+}
+.wc-type-btn:hover .wc-tip { display: block; }
+.wc-tip-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.5px; text-transform: uppercase;
+  margin-bottom: 6px; display: block;
+}
+.wc-tip-def {
+  font-size: 12px; color: rgba(255,255,255,0.82); line-height: 1.6;
+}
+.wc-tip-def strong { color: #fff; font-weight: 600; }
+/* Definition panel */
+.wc-def-panel {
+  margin-top: 6px;
+  display: none;
+  background: #f0f5fa;
+  border: 1px solid var(--rule);
+  border-left: 3px solid #013349;
+  border-radius: 0 6px 6px 0;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #013349;
+  width: 100%;
+  box-sizing: border-box;
+}
+.wc-def-panel.open { display: block; }
+.wc-def-panel-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 600;
+  color: var(--navy);
+  letter-spacing: 0.5px; text-transform: uppercase;
+  margin-bottom: 5px; display: block;
+}
+.wc-def-panel p { margin: 0; }
+.wc-def-panel strong { color: #013349; }
+.wc-vr-check { font-size: 14px; color: var(--teal); opacity: 0; transition: opacity .2s; flex-shrink: 0; }
+.wc-visit-row.configured .wc-vr-check { opacity: 1; }
+
+.wc-begin-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #FF6720 0%, #BE531C 100%);
+  color: #fff; border: none; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  letter-spacing: -0.1px;
+  opacity: 0.35; pointer-events: none;
+  box-shadow: 0 4px 14px rgba(255,103,32,0.35);
+}
+.wc-begin-btn.ready { opacity: 1; pointer-events: auto; }
+.wc-begin-btn.ready:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,103,32,0.45); }
+.wc-back-link {
+  display: inline-block; margin-top: 12px;
+  font-size: 12px; color: #013349;
+  cursor: pointer; transition: color .15s;
+  background: none; border: none;
+  font-family: 'DM Sans', sans-serif;
+}
+.wc-back-link:hover { color: #013349; }
+
+/* ── ADD VISIT POPUP ── */
+.add-type-popup {
+  position: fixed; z-index: 300;
+  background: #fff;
+  border: 1.5px solid var(--rule);
+  border-radius: 10px; padding: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  width: 240px; display: none;
+}
+.add-type-popup.on { display: block; }
+.atp-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+  color: #013349; margin-bottom: 10px;
+}
+.atp-btns { display: flex; flex-direction: column; gap: 6px; }
+.atp-btn {
+  padding: 10px 14px; border-radius: 6px;
+  border: 1px solid var(--rule); background: var(--bg-panel);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  color: var(--text-md); cursor: pointer; transition: all .15s;
+  text-align: left; display: flex; align-items: center; gap: 10px;
+}
+.atp-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--blue-lt); }
+.atp-btn .atp-icon {
+  width: 24px; height: 24px; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; background: var(--rule); flex-shrink: 0;
+}
+.atp-cancel {
+  margin-top: 8px; width: 100%; padding: 7px;
+  background: transparent; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 12px;
+  color: var(--text-dim); cursor: pointer;
+}
+.atp-cancel:hover { color: var(--text-md); }
+
+/* ─── QUESTION THREAD ─── */
+.chat-area {
+  display: none; flex: 1;
+  padding: 28px 0 40px;
+  width: 100%;
+}
+.chat-area.on { display: block; }
+
+/* ─── SECTION DIVIDER ─── */
+.s-divider {
+  display: flex; align-items: center; gap: 0;
+  margin: 22px 24px 0;
+  animation: fadeIn .3s ease;
+}
+.sd-accent {
+  width: 4px; border-radius: 2px 0 0 2px;
+  align-self: stretch; min-height: 32px;
+  flex-shrink: 0;
+  background: #FF6720 !important;
+}
+.sd-inner {
+  flex: 1;
+  background: #101820;
+  border: 1px solid #101820;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  padding: 8px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.sd-icon { font-size: 14px; flex-shrink: 0; }
+.sd-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.2px; text-transform: none;
+  color: #FF6720;
+}
+
+/* ─── ANSWERED CHIP ─── */
+.q-chip {
+  display: flex; align-items: center;
+  gap: 0; margin: 6px 24px 0;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--rule);
+  background: #fff;
+  cursor: pointer; transition: all .15s;
+  animation: chipIn .2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+@keyframes chipIn {
+  from{opacity:0;transform:translateY(-3px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.q-chip:hover { border-color: var(--teal); box-shadow: 0 2px 8px rgba(0,174,199,0.2); }
+.q-chip:hover .qc-edit { color: var(--navy); }
+.qc-label {
+  font-size: 12px; font-weight: 500; color: var(--text-lt);
+  padding: 9px 12px; flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  border-right: 1px solid var(--rule);
+}
+.qc-answer {
+  font-size: 12px; font-weight: 700; color: var(--teal);
+  padding: 9px 12px; white-space: nowrap; flex-shrink: 0;
+}
+.qc-edit {
+  font-size: 10px; color: var(--text-dim);
+  padding: 9px 10px 9px 0; flex-shrink: 0;
+}
+
+/* ─── QUESTION CARD ─── */
+.q-card {
+  margin: 8px 24px 0;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(1,51,73,0.15), 0 1px 0 rgba(255,255,255,0.5);
+  animation: cardIn .28s cubic-bezier(0.22,1,0.36,1);
+}
+/* Active (first unanswered) card — indigo accent border + lift */
+.q-card.q-card-active {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0,174,199,0.12), 0 8px 24px rgba(0,78,113,0.12);
+}
+@keyframes cardIn {
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.qc-top {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--rule);
+  background: linear-gradient(180deg, #FAFBFF 0%, #fff 100%);
+}
+.qc-q {
+  font-family: 'Barlow Semi Condensed', sans-serif;
+  font-size: 17px; font-weight: 700; color: #013349;
+  line-height: 1.4; letter-spacing: 0.1px;
+}
+.qc-hint {
+  font-size: 13px; color: var(--text-md); line-height: 1.65;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(0,174,199,0.08);
+  border-left: 3px solid rgba(0,174,199,0.6);
+  border-radius: 0 6px 6px 0;
+}
+.qc-hint strong { color: var(--text); }
+.qc-hint ul { padding-left: 18px; margin-top: 4px; }
+.qc-hint li { margin-bottom: 4px; }
+.qc-btns {
+  padding: 14px 16px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+
+/* ─── YES/NO BUTTONS ─── */
+.ans-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  border: 1.5px solid #8AAAB8;
+  border-radius: 10px; background: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-md); cursor: pointer;
+  transition: all .15s; flex: 1; min-width: 140px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.ans-btn:hover { border-color: #00AEC7; color: #013349; background: rgba(0,174,199,0.15); box-shadow: 0 2px 8px rgba(0,174,199,0.2); }
+.ans-btn.on {
+  background: var(--green-lt);
+  border-color: var(--green-bd);
+  color: var(--green);
+}
+.ans-btn.on.ans-btn-navy {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+.ans-btn .ab-radio {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .15s;
+  font-size: 11px; line-height: 1;
+}
+.ans-btn.on .ab-radio {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.ans-btn.on.ans-btn-navy .ab-radio {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.6);
+  color: #fff;
+}
+
+/* ─── CHECKBOX GRID ─── */
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 6px;
+  padding: 12px 14px;
+}
+.chk-btn {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid #8AAAB8;
+  border-radius: 10px; background: #fff;
+  font-size: 12px; font-weight: 600;
+  color: #013349; cursor: pointer;
+  transition: all .13s; line-height: 1.4;
+  user-select: none; position: relative;
+  flex-direction: row;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.chk-btn:hover { border-color: #00AEC7; color: #013349; background: rgba(0,174,199,0.15); box-shadow: 0 2px 8px rgba(0,174,199,0.15); }
+.chk-btn.on {
+  background: var(--green-lt);
+  border-color: var(--green-bd);
+  color: var(--green);
+}
+.chk-btn.conflict-blocked {
+  opacity: 0.45; cursor: not-allowed;
+  border-color: var(--amber-bd);
+  background: var(--amber-lt);
+  color: var(--amber);
+}
+.chk-btn.conflict-blocked:hover { border-color: var(--amber); }
+.chk-box {
+  width: 15px; height: 15px; border-radius: 3px;
+  border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px; transition: all .13s;
+  font-size: 10px; line-height: 1; font-weight: 700;
+}
+.chk-btn.on .chk-box { background: var(--green); border-color: var(--green); color: #fff; }
+.chk-btn.conflict-blocked .chk-box { border-color: var(--red-bd); }
+
+/* ─── INDICATION DEFINITION (inline panel) ─── */
+.ind-view-def {
+  font-size: 10px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-lt);
+  cursor: pointer;
+  user-select: none;
+  transition: color .15s;
+  line-height: 1;
+}
+.ind-view-def:hover { color: var(--teal); }
+.chk-btn.on .ind-view-def { color: var(--green); opacity: 0.65; }
+.ind-def-panel {
+  display: none;
+  grid-column: 1 / -1;
+  background: #f8fafc;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--orange);
+  border-radius: 0 6px 6px 0;
+  padding: 9px 13px;
+  font-size: 12px; font-weight: 400;
+  color: var(--text-md); line-height: 1.6;
+  margin-top: 2px;
+}
+.ind-def-panel.open { display: block; }
+.ind-def-panel-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 600;
+  color: var(--teal);
+  text-transform: uppercase; letter-spacing: 0.4px;
+  display: block; margin-bottom: 4px;
+}
+/* Conflict tooltip retained for blocked items only */
+.chk-btn .tip-conflict {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%; transform: translateX(-50%);
+  width: 220px; max-width: 90vw;
+  background: #001E2C;
+  border-radius: 6px; padding: 10px 12px;
+  font-size: 11px; font-weight: 400;
+  color: rgba(255,255,255,0.85); line-height: 1.55;
+  z-index: 500;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+  pointer-events: none; text-align: left;
+}
+.chk-btn .tip-conflict::after {
+  content: '';
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--navy);
+}
+.chk-btn:hover .tip-conflict { display: block; }
+.chk-btn .tip-conflict-body { color: #FFD580; font-size: 11px; }
+.chk-btn .tip-conflict-body strong { display: block; margin-bottom: 4px; font-size: 11px; }
+.chk-btn .tip-conflict-rationale {
+  display: block; margin-top: 4px;
+  font-size: 11px; opacity: 0.85;
+  line-height: 1.5; font-style: italic;
+}
+
+/* ─── INLINE ALERTS ─── */
+.i-alert {
+  margin: 8px 14px 4px; padding: 10px 14px;
+  border-radius: 6px; font-size: 13px; line-height: 1.6;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.i-alert strong { font-weight: 700; }
+.ia-i { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+/* CONFIRMED — indication identified (green left rule, neutral bg) */
+.ia-ok {
+  background: var(--bg-panel);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--green);
+  color: var(--text-md);
+}
+/* NOTE — neutral, informational guidance */
+.ia-info {
+  background: var(--bg-panel);
+  border: 1px solid var(--rule);
+  color: var(--text-md);
+}
+/* CAUTION — requires attention; also used for conflicts */
+.ia-warn, .ia-danger {
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.3);
+  color: var(--amber);
+}
+
+/* ─── CONFLICT BANNER ─── */
+.conflict-banner {
+  margin: 8px 24px 0;
+  padding: 14px 16px;
+  border-radius: 6px;
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.3);
+  color: var(--amber);
+  display: flex; align-items: flex-start; gap: 12px;
+  animation: fadeIn .25s ease;
+}
+.conflict-banner-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.conflict-banner-body { flex: 1; }
+.conflict-banner strong {
+  display: block; font-size: 13px; font-weight: 700; margin-bottom: 4px;
+}
+.conflict-banner-msg { font-size: 12.5px; line-height: 1.55; margin-bottom: 8px; }
+.conflict-banner-action {
+  font-size: 12px; font-weight: 600;
+  padding: 6px 12px;
+  background: rgba(146,96,10,0.1);
+  border: 1px solid var(--amber-bd);
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+/* ─── SKIP / BLOCKED NOTICES ─── */
+.s-skip {
+  margin: 6px 24px 0;
+  padding: 9px 14px;
+  border-radius: 6px;
+  background: #013349;
+  border: 1px solid rgba(0,174,199,0.35);
+  font-size: 12.5px; color: var(--teal);
+  display: flex; align-items: flex-start; gap: 8px;
+  animation: fadeIn .3s ease;
+}
+.s-blocked {
+  margin: 6px 24px 0;
+  padding: 11px 14px;
+  border-radius: 6px;
+  background: var(--amber-lt);
+  border: 1px solid var(--amber-bd);
+  font-size: 13px; color: var(--amber);
+  display: flex; align-items: flex-start; gap: 8px;
+  animation: fadeIn .3s ease;
+  line-height: 1.55;
+}
+
+/* ─── PENDING STEP ─── */
+.q-pending {
+  margin: 6px 24px 0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1.5px dashed var(--rule);
+  color: var(--text-dim);
+  font-size: 13px;
+  display: flex; align-items: center; gap: 10px;
+  animation: fadeIn .3s ease;
+}
+.q-pending-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--rule-dk); flex-shrink: 0;
+}
+
+/* ─── MULTI-SELECT FOOTER ─── */
+.qc-multi-done { padding: 6px 14px 12px; }
+.multi-done-btn {
+  padding: 9px 20px;
+  border: 1.5px solid var(--rule-dk);
+  border-radius: 6px; background: transparent;
+  color: var(--text-md); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.multi-done-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--blue-lt); }
+.none-apply-btn {
+  padding: 9px 18px;
+  border: 1.5px solid var(--rule-dk);
+  border-radius: 6px; background: transparent;
+  color: #013349; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.none-apply-btn:hover { border-color: #00AEC7; color: #00AEC7; }
+.none-apply-btn.selected {
+  background: var(--navy); border-color: var(--navy);
+  color: #fff; cursor: default;
+}
+
+/* ─── NEXT VISIT BUTTON ─── */
+.next-visit-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 24px 24px 8px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #013349 0%, #074F71 100%);
+  color: #fff; border: none; border-radius: 10px;
+  font-family: 'Barlow Semi Condensed', sans-serif;
+  font-size: 16px; font-weight: 700; letter-spacing: 0.3px;
+  cursor: pointer; transition: all .2s;
+  box-shadow: 0 4px 14px rgba(1,51,73,0.25);
+  width: calc(100% - 48px);
+}
+.next-visit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(1,51,73,0.35);
+}
+.next-visit-btn .nvb-arrow {
+  font-size: 18px; transition: transform .2s;
+}
+.next-visit-btn:hover .nvb-arrow { transform: translateX(4px); }
+.next-visit-btn .nvb-label { flex: 1; text-align: center; }
+
+/* ─── GENERATE BUTTON ─── */
+.gen-dock {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 12px 24px 22px;
+  background: linear-gradient(to top, var(--bg) 75%, transparent);
+  z-index: 100; display: none;
+  max-width: 788px; margin: 0 auto;
+  left: 50%; transform: translateX(-50%);
+  width: 100%;
+}
+@media (min-width: 801px) { .gen-dock { display: none !important; } }
+@media (max-width: 800px)  { .gen-dock.on { display: block; } }
+.gen-btn {
+  width: 100%; padding: 14px;
+  background: var(--navy);
+  color: #fff; border: none; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  letter-spacing: -0.1px;
+  box-shadow: 0 4px 16px rgba(11,37,69,0.25);
+}
+.gen-btn:hover { background: var(--navy-md); box-shadow: 0 6px 24px rgba(11,37,69,0.3); }
+
+/* ─── RESULTS SCREEN ─── */
+.results {
+  display: block;
+  padding: 0 24px 60px;
+}
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+
+.res-hdr {
+  margin: 28px 24px 16px;
+  border-bottom: 2px solid var(--rule); padding-bottom: 14px;
+}
+.res-hdr-title {
+  font-family: 'Barlow Semi Condensed', sans-serif;
+  font-size: 17px; font-weight: 600; color: #013349;
+  letter-spacing: -0.2px; margin-bottom: 3px;
+}
+.res-hdr-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-lt);
+}
+.res-visit { margin-bottom: 12px; margin-left: 24px; margin-right: 24px; }
+.rv-card {
+  background: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--rule);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.rv-top {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #013349 0%, #074F71 100%);
+  border-bottom: 1px solid var(--rule);
+}
+.rv-badge {
+  width: 30px; height: 30px; border-radius: 6px;
+  background: rgba(255,255,255,0.15); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; flex-shrink: 0;
+}
+.rv-name { font-size: 14px; font-weight: 700; color: #fff; }
+.rv-ctx {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  color: rgba(255,255,255,0.5); margin-top: 2px;
+}
+.rv-body { padding: 14px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:600px){ .rv-body{grid-template-columns:1fr;} }
+.rv-section {}
+.rv-sec-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); margin-bottom: 8px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--rule);
+}
+.rv-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.rv-tag {
+  padding: 4px 10px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+  background: var(--blue-lt); border: 1px solid #B3CCEE;
+  color: var(--blue);
+}
+.rv-tag-pci {
+  background: var(--ora-lt);
+  border-color: var(--ora-bd);
+  color: var(--orange);
+}
+.rv-empty { font-size: 11px; color: #074F71; font-style: italic; }
+.rv-note { font-size: 11px; color: #013349; line-height: 1.5; margin-top: 6px; }
+.rv-warn { font-size: 12px; color: var(--amber); padding: 10px 14px; background: var(--amber-lt); border-radius: 5px; }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-logo">
+    <svg viewBox="0 0 60 60" fill="none">
+      <polygon points="30,4 25,22 35,22" fill="rgba(255,255,255,0.9)"/>
+      <polygon points="30,56 35,38 25,38" fill="rgba(255,255,255,0.9)"/>
+      <polygon points="4,30 22,25 22,35" fill="rgba(255,255,255,0.9)"/>
+      <polygon points="56,30 38,35 38,25" fill="rgba(255,255,255,0.9)"/>
+      <polygon points="10,10 22,24 26,20" fill="rgba(255,255,255,0.45)"/>
+      <polygon points="50,10 38,24 34,20" fill="rgba(255,255,255,0.45)"/>
+      <polygon points="10,50 22,36 26,40" fill="rgba(255,255,255,0.45)"/>
+      <polygon points="50,50 38,36 34,40" fill="rgba(255,255,255,0.45)"/>
+    </svg>
+    <span class="hdr-brand">Carta Healthcare</span>
+  </div>
+  <div class="hdr-sep"></div>
+  <span class="hdr-title">Cath Lab &amp; PCI Indication Decision Guide</span>
+  <div class="hdr-right">
+    <span class="hdr-badge">NCDR v5</span>
+    <button class="hdr-reset" onclick="hardReset()">&#8635; Reset</button>
+  </div>
+</header>
+
+<!-- VISIT TAB BAR -->
+<div class="visit-bar" id="visit-bar"></div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+
+  <!-- WELCOME -->
+  <div class="welcome" id="welcome">
+    <div class="wc-inner">
+      <div class="wc-emblem">
+        <svg viewBox="0 0 60 60" fill="none">
+          <polygon points="30,4 25,22 35,22" fill="#0B2545"/>
+          <polygon points="30,56 35,38 25,38" fill="#0B2545"/>
+          <polygon points="4,30 22,25 22,35" fill="#0B2545"/>
+          <polygon points="56,30 38,35 38,25" fill="#0B2545"/>
+          <polygon points="10,10 22,24 26,20" fill="#0B2545" opacity="0.4"/>
+          <polygon points="50,10 38,24 34,20" fill="#0B2545" opacity="0.4"/>
+          <polygon points="10,50 22,36 26,40" fill="#0B2545" opacity="0.4"/>
+          <polygon points="50,50 38,36 34,40" fill="#0B2545" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="wc-title">Cath Lab &amp; PCI Indication<br>Decision Guide</div>
+      <div class="wc-sub">Answer one question at a time to identify the correct Seq&nbsp;#7400 and Seq&nbsp;#7825 indications for each Cath Lab visit in this encounter.</div>
+
+      <!-- STEP 1: visit count -->
+      <div id="wc-step1">
+        <div class="wc-prompt">How many Cath Lab visits in this encounter?</div>
+        <div class="wc-count-row">
+          <button class="wc-count-btn" onclick="selectCount(1)"><span class="num">1</span><span class="lbl">Visit</span></button>
+          <button class="wc-count-btn" onclick="selectCount(2)"><span class="num">2</span><span class="lbl">Visits</span></button>
+          <button class="wc-count-btn" onclick="selectCount(3)"><span class="num">3+</span><span class="lbl">Visits</span></button>
+        </div>
+      </div>
+
+      <!-- STEP 2: case type per visit -->
+      <div id="wc-step2" class="wc-step2">
+        <div class="wc-step1-row" id="wc-count-chip"></div>
+        <div class="wc-prompt">Select the case type for each visit</div>
+        <div class="wc-visits-grid" id="wc-visits-grid"></div>
+        <button class="wc-begin-btn" id="wc-begin-btn" onclick="beginEncounter()">Begin Encounter &ensp;&#8594;</button>
+        <br>
+        <button class="wc-back-link" onclick="backToStep1()">&#8592; Change visit count</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD VISIT TYPE POPUP -->
+  <div class="add-type-popup" id="add-type-popup">
+    <div class="atp-title">Select Case Type</div>
+    <div class="atp-btns">
+      <button class="atp-btn" onclick="confirmAddVisit('diag')" title="No PCI performed or attempted — guide wire was not crossed into a coronary vessel for intervention.">
+        <span class="atp-icon">&#128203;</span>Diagnostic Only
+      </button>
+      <button class="atp-btn" onclick="confirmAddVisit('pci')" title="PCI performed, attempted, or aborted — guide wire crossing for intervention constitutes PCI even if unsuccessful.">
+        <span class="atp-icon">&#10010;</span>PCI
+      </button>
+    </div>
+    <button class="atp-cancel" onclick="closeAddPopup()">Cancel</button>
+  </div>
+
+  <!-- GUIDE LAYOUT: thread + live sidebar -->
+  <div class="guide-layout" id="guide-layout" style="display:none">
+    <div class="guide-thread">
+      <!-- QUESTION THREAD -->
+      <div class="chat-area" id="chat-area"></div>
+      <!-- Results now in sidebar -->
+      <div id="results" style="display:none"></div>
+    </div>
+    <!-- LIVE SELECTIONS SIDEBAR -->
+    <div class="sel-sidebar" id="sel-sidebar">
+      <div class="ss-head">
+        <div class="ss-title">Results Summary</div>
+      </div>
+      <div class="ss-body" id="ss-body"></div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- GENERATE DOCK (mobile fallback) -->
+<div class="gen-dock" id="gen-dock">
+  <button class="gen-btn" onclick="showResults()">&#9654;&ensp;Generate Results Summary</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/json-rules-engine@6.1.2/dist/bundle.js"></script>
+<script>/* CathPCI Decision Tool v3.1 – built 2026-03-13 18:55 */
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+var S = { n:0, visits:[], cur:0 };
+
+// Pending setup state (welcome screen)
+var SETUP = { n:0, types:[] };
+
+function blank(caseType) {
+  return {
+    caseType: caseType||'diag',   // 'diag' | 'pci'
+    // context (visits 2+)
+    isXfer:null, xferHadPCI:null, staged:null, docExists:null,
+    // ACS
+    acs_yn:null, acs_sel:[], acs_type:[],
+    // Angina
+    angina_yn:null, angina_hx:null, angina_worse:null,
+    // CAD
+    cad_hx:null, cad_stable:null,
+    // Arrest
+    arrest_yn:null,
+    // Multi-selects
+    nonisch_sel:[], noncardiac_sel:[], susp_sel:[], other_sel:[],
+    // Track which multi-select sections have been seen/advanced past
+    nonisch_seen:false, noncardiac_seen:false, susp_seen:false, other_seen:false,
+    // Inline Suspected CAD answer from CAD history pathway
+    susp_yn:null,
+    // New ACS episode since prior visit (only asked when prior visit had ACS)
+    newAcsEpisode:null,
+    // ACS type + timing (exclusive)
+    acs_timing:null,           // 'lte24' | 'gt24'
+    // STEMI detail questions
+    stemi_lytics:null,         // true | false
+    stemi_lytics_success:null, // true | false (if lytics given)
+    stemi_immediate:null,      // true | false (if no lytics)
+    stemi_sx_dur:null,         // 'lte12' | 'gt12' (if not immediate)
+    stemi_unstable:null,       // true | false (instability present)
+    // Step index currently being re-edited (-1 = none)
+    acs_sel_done:false,
+    reopenedStep:-1
+  };
+}
+
+/* ── WELCOME STEP FUNCTIONS ── */
+function selectCount(n) {
+  SETUP.n=n; SETUP.types=[];
+  for(var i=0;i<n;i++) SETUP.types.push(null);
+  // Show step 1 chip
+  var chip=document.getElementById('wc-count-chip');
+  chip.innerHTML='<span class="wc-step1-chip">'+n+(n===1?' Visit':' Visits')+'</span>';
+  // Build visit rows
+  buildSetupGrid();
+  // Switch panels
+  document.getElementById('wc-step1').style.display='none';
+  document.getElementById('wc-step2').classList.add('on');
+}
+
+function backToStep1() {
+  document.getElementById('wc-step1').style.display='block';
+  document.getElementById('wc-step2').classList.remove('on');
+  SETUP.n=0; SETUP.types=[];
+}
+
+function buildSetupGrid() {
+  var grid=document.getElementById('wc-visits-grid');
+  grid.innerHTML='';
+  for(var i=0;i<SETUP.n;i++){
+    (function(idx){
+      var row=document.createElement('div');
+      var configured=SETUP.types[idx]!==null;
+      row.className='wc-visit-row'+(configured?' configured':'');
+      row.id='setup-row-'+idx;
+      row.innerHTML=
+        '<div class="wc-vr-num">'+(idx+1)+'</div>'+
+        '<div class="wc-vr-label">Visit '+(idx+1)+'</div>'+
+        '<div class="wc-type-btns">'+
+          '<button class="wc-type-btn'+(SETUP.types[idx]==='diag'?' on-diag':'')+'" onclick="setSetupType('+idx+',\'diag\')">Diagnostic Only'+
+            '<span class="wc-tip">'+
+              '<span class="wc-tip-name">Diagnostic Only</span>'+
+              '<span class="wc-tip-def">A Cath Lab visit in which <strong>no PCI was performed or attempted</strong>. Includes diagnostic coronary angiography, hemodynamic assessment, and other non-interventional procedures. Guide wire was <strong>not</strong> crossed into a coronary vessel for the purpose of intervention.</span>'+
+            '</span>'+
+          '</button>'+
+          '<button class="wc-type-btn'+(SETUP.types[idx]==='pci'?' on-pci':'')+'" onclick="setSetupType('+idx+',\'pci\')">PCI'+
+            '<span class="wc-tip">'+
+              '<span class="wc-tip-name">PCI (including attempted / aborted)</span>'+
+              '<span class="wc-tip-def">A Cath Lab visit in which PCI was <strong>performed, attempted, or aborted</strong>. Guide wire crossing into a coronary vessel for the purpose of intervention constitutes a PCI — even if the procedure was unsuccessful, abandoned, or complicated. An aborted or failed attempt still triggers a CathPCI record.</span>'+
+            '</span>'+
+          '</button>'+
+        '</div>'+
+        '<span class="wc-vr-check">&#10003;</span>'+
+        '<div class="wc-def-panel" id="def-diag-'+idx+'">'+
+          '<span class="wc-def-panel-name">Diagnostic Only</span>'+
+          '<p>A Cath Lab visit in which <strong>no PCI was performed or attempted</strong>. Includes diagnostic coronary angiography, hemodynamic assessment, and other non-interventional procedures. Guide wire was <strong>not</strong> crossed into a coronary vessel for the purpose of intervention.</p>'+
+        '</div>'+
+        '<div class="wc-def-panel" id="def-pci-'+idx+'">'+
+          '<span class="wc-def-panel-name">PCI (including attempted / aborted)</span>'+
+          '<p>A Cath Lab visit in which PCI was <strong>performed, attempted, or aborted</strong>. Guide wire crossing into a coronary vessel for the purpose of intervention constitutes a PCI — even if the procedure was unsuccessful, abandoned, or complicated. An aborted or failed attempt still triggers a CathPCI record.</p>'+
+        '</div>';
+      grid.appendChild(row);
+    })(i);
+  }
+  checkBeginReady();
+}
+
+function toggleWcDef(e, showId, hideId) {
+  e.stopPropagation();
+  var show = document.getElementById(showId);
+  var hide = document.getElementById(hideId);
+  if(!show) return;
+  var isOpen = show.classList.contains('open');
+  // Close any other open panels first
+  document.querySelectorAll('.wc-def-panel.open').forEach(function(p){ p.classList.remove('open'); });
+  if(!isOpen) show.classList.add('open');
+}
+
+function setSetupType(idx, type) {
+  SETUP.types[idx]=type;
+  buildSetupGrid();
+}
+
+function checkBeginReady() {
+  var allSet=SETUP.types.every(function(t){ return t!==null; });
+  var btn=document.getElementById('wc-begin-btn');
+  btn.classList.toggle('ready', allSet);
+}
+
+function beginEncounter() {
+  if(!SETUP.types.every(function(t){ return t!==null; })) return;
+  initVisits(SETUP.n, SETUP.types);
+}
+
+/* ── ADD VISIT POPUP ── */
+function addVisit(){
+  var popup=document.getElementById('add-type-popup');
+  // Position near + button in visit bar
+  var bar=document.getElementById('visit-bar');
+  var barRect=bar.getBoundingClientRect();
+  popup.style.top=(barRect.bottom+6)+'px';
+  popup.style.right='16px';
+  popup.style.left='auto';
+  popup.classList.add('on');
+}
+
+function confirmAddVisit(type){
+  closeAddPopup();
+  S.n++; S.visits.push(blank(type));
+  buildVisitBar();
+  switchVisit(S.n-1);
+}
+
+function closeAddPopup(){
+  document.getElementById('add-type-popup').classList.remove('on');
+}
+
+// Close popup on outside click
+document.addEventListener('click', function(e){
+  var popup=document.getElementById('add-type-popup');
+  if(popup&&popup.classList.contains('on')){
+    if(!popup.contains(e.target)&&!e.target.classList.contains('vb-add')){
+      closeAddPopup();
+    }
+  }
+});
+
+var ACS_TYPE_LABELS = {
+  stemi:'STEMI', nstemi:'NSTEMI', ua:'Unstable Angina', acs_no:'No ACS'
+};
+var LABELS = {
+  acs24:'ACS \u2264 24 hrs', acsgt:'ACS > 24 hrs',
+  noa:'New Onset Angina \u2264 2 months', wora:'Worsening Angina',
+  skcad:'Stable Known CAD', susp:'Suspected CAD',
+  rca:'Resuscitated Cardiac Arrest',
+  valv:'Valvular Disease', peri:'Pericardial Disease',
+  arrh:'Cardiac Arrhythmia', cmp:'Cardiomyopathy',
+  lvd:'LV Dysfunction', sync:'Syncope', txpl:'Post Cardiac Transplant',
+  preo:'Pre-Operative Evaluation', excc:'Eval. for Exercise Clearance',
+  other:'Other'
+};
+
+/* ── INDICATION DEFINITIONS (shown on hover) ── */
+var DEFS = {
+  acs24: 'Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is \u226424 hours prior to cath lab presentation. For patients presenting with ACS, choose the most applicable selection between ACS \u226424 hrs and ACS >24 hrs — these options may not be selected together.',
+  acsgt: 'Acute Coronary Syndrome (unstable angina, NSTEMI or STEMI) is >24 hours prior to cath lab presentation (STEMI/NSTEMI \u22647 days from symptoms). For patients presenting with ACS, choose the most applicable selection between ACS \u226424 hrs and ACS >24 hrs — these options may not be selected together.',
+  noa:   'New onset angina (typical or atypical angina), within two months of cath lab presentation.',
+  wora:  'The patient has a history of angina that has increased in severity or frequency within the last 2 months.',
+  skcad: 'The patient is stable (without signs or symptoms of acute coronary syndrome, new onset or worsening angina, or hemodynamic instability) and has known coronary artery disease \u226550% in at least one vessel.',
+  susp:  'Suspected Coronary Artery Disease — no prior documentation of CAD \u226550% in a vessel.',
+  rca:   'The patient presents status post cardiac arrest.',
+  valv:  'There is disease of at least one heart valve.',
+  peri:  'Pericardial disease is inflammation of the pericardial sac.',
+  arrh:  'Cardiac arrhythmia (also known as cardiac dysrhythmia or irregular heartbeat) — a group of conditions in which the heartbeat is irregular, too fast, or too slow.',
+  cmp:   'Cardiomyopathy is a disease of the heart muscle. Types include hypertrophic, dilated, restrictive, arrhythmogenic right ventricular dysplasia, and Takotsubo cardiomyopathy.',
+  lvd:   'LV dysfunction: in left-sided or left ventricular heart failure, the left side of the heart must work harder to pump the same amount of blood. The two types are systolic and diastolic heart failure.',
+  sync:  'Syncope presents with an abrupt, transient, complete loss of consciousness associated with inability to maintain postural tone, with rapid and spontaneous recovery.',
+  txpl:  'A cardiac transplant is a heart transplanted from a donor.',
+  preo:  'Cardiac evaluation of the coronary arteries and/or LV function.',
+  excc:  'The patient presents for clearance to participate in an exercise program or cardiac rehab.',
+  other: 'Not otherwise specified. Use only when no other indication applies.'
+};
+
+/* ── CONFLICT RULES (mutual exclusion per NCDR vendor instructions) ──
+   Each entry: { trigger: val, blocks: [val, ...], reason: string }
+   Applied across ALL indication fields combined.                      */
+var CONFLICT_RULES = [
+  // ACS ≤24 and ACS >24 are mutually exclusive
+  {
+    trigger:'acs24', blocks:['acsgt'],
+    reason:'ACS ≤24 hrs and ACS >24 hrs cannot both be selected.',
+    rationale:'These two options represent mutually exclusive time windows for the same ACS event. The NCDR requires you to select only the one that most accurately reflects the time from ACS diagnosis to Cath Lab presentation. Selecting both would create a logical contradiction in the data.'
+  },
+  {
+    trigger:'acsgt', blocks:['acs24'],
+    reason:'ACS ≤24 hrs and ACS >24 hrs cannot both be selected.',
+    rationale:'These two options represent mutually exclusive time windows for the same ACS event. The NCDR requires you to select only the one that most accurately reflects the time from ACS diagnosis to Cath Lab presentation. Selecting both would create a logical contradiction in the data.'
+  },
+  // New Onset Angina and Worsening Angina are mutually exclusive
+  {
+    trigger:'noa', blocks:['wora'],
+    reason:'New Onset Angina and Worsening Angina cannot both be selected.',
+    rationale:'New Onset Angina applies only when the patient has no prior history of angina (symptoms began within the past 2 months). Worsening Angina requires a prior history of angina that has increased in severity or frequency. A patient cannot simultaneously have no prior angina history and a worsening prior angina pattern — one of these pathways must apply, not both.'
+  },
+  {
+    trigger:'wora', blocks:['noa'],
+    reason:'New Onset Angina and Worsening Angina cannot both be selected.',
+    rationale:'New Onset Angina applies only when the patient has no prior history of angina (symptoms began within the past 2 months). Worsening Angina requires a prior history of angina that has increased in severity or frequency. A patient cannot simultaneously have no prior angina history and a worsening prior angina pattern — one of these pathways must apply, not both.'
+  },
+  // Stable Known CAD incompatible with acute/unstable/uncertain indications
+  {
+    trigger:'skcad', blocks:['acs24','acsgt','noa','wora','susp','rca'],
+    reason:'Stable Known CAD cannot be selected alongside ACS, anginal, Suspected CAD, or Cardiac Arrest indications.',
+    rationale:'Stable Known CAD requires the patient to be hemodynamically stable with no signs or symptoms of ACS, no new-onset or worsening angina, and known CAD ≥50% in at least one vessel. Each of the blocked indications directly contradicts the definition of “stable” — an active ACS event, changing angina pattern, uncertainty about CAD, or cardiac arrest all indicate an acute or unstable condition that is clinically incompatible with coding this visit as Stable Known CAD.'
+  },
+  {
+    trigger:'acs24', blocks:['skcad'],
+    reason:'Stable Known CAD cannot be selected with an ACS indication.',
+    rationale:'An active ACS event (STEMI, NSTEMI, or Unstable Angina) is by definition an acute, unstable presentation. Stable Known CAD requires the patient to be hemodynamically stable with no ACS signs or symptoms. These two states are clinically mutually exclusive — if the patient is experiencing ACS, they cannot simultaneously be coded as stable.'
+  },
+  {
+    trigger:'acsgt', blocks:['skcad'],
+    reason:'Stable Known CAD cannot be selected with an ACS indication.',
+    rationale:'An active ACS event (STEMI, NSTEMI, or Unstable Angina) is by definition an acute, unstable presentation. Stable Known CAD requires the patient to be hemodynamically stable with no ACS signs or symptoms. These two states are clinically mutually exclusive — if the patient is experiencing ACS, they cannot simultaneously be coded as stable.'
+  },
+  {
+    trigger:'noa', blocks:['skcad'],
+    reason:'Stable Known CAD cannot be selected with New Onset Angina.',
+    rationale:'New Onset Angina indicates that the patient is experiencing new ischemic symptoms (within the past 2 months), which places the patient in an unstable or transitional clinical state. Stable Known CAD requires no new-onset angina by definition. Additionally, Stable Known CAD requires documented CAD ≥50%, whereas New Onset Angina implies the diagnosis is not yet fully established.'
+  },
+  {
+    trigger:'wora', blocks:['skcad'],
+    reason:'Stable Known CAD cannot be selected with Worsening Angina.',
+    rationale:'Worsening Angina indicates the patient’s anginal pattern has changed in frequency or severity within the past 2 months, representing clinical instability. Stable Known CAD explicitly requires that angina, if present, has been unchanged for at least 6 weeks. A patient with worsening symptoms does not meet the stability threshold required for Stable Known CAD.'
+  },
+  {
+    trigger:'susp', blocks:['skcad'],
+    reason:'Stable Known CAD cannot be selected with Suspected CAD.',
+    rationale:'Stable Known CAD requires previously documented CAD ≥50% in at least one vessel (e.g., prior MI, PCI, CABG, or cath-confirmed stenosis). Suspected CAD is used precisely when that documentation does not exist. These two indications are mutually exclusive by definition — a patient cannot have both confirmed and unconfirmed CAD simultaneously.'
+  },
+  {
+    trigger:'rca', blocks:['skcad'],
+    reason:'Stable Known CAD cannot be selected with Resuscitated Cardiac Arrest.',
+    rationale:'A patient presenting status post cardiac arrest is in an acute, emergent state and cannot be classified as stable. Stable Known CAD requires hemodynamic stability and the absence of acute symptoms. Cardiac arrest is one of the most extreme acute presentations and is directly incompatible with the “stable” qualifier.'
+  }
+];
+
+/* Returns set of blocked indication values given currently selected values */
+function getBlockedVals(currentSels) {
+  var blocked = {};
+  var reasons = {};
+  var rationales = {};
+  currentSels.forEach(function(sel) {
+    CONFLICT_RULES.forEach(function(rule) {
+      if(rule.trigger === sel) {
+        rule.blocks.forEach(function(b) {
+          blocked[b] = true;
+          reasons[b] = rule.reason;
+          rationales[b] = rule.rationale||'';
+        });
+      }
+    });
+  });
+  return { blocked: blocked, reasons: reasons, rationales: rationales };
+}
+
+/* Returns conflict alert messages for currently selected values that are in conflict */
+function getActiveConflictMessages(selectedArr, blockInfo) {
+  var msgs = [];
+  var seen = {};
+  selectedArr.forEach(function(sel) {
+    CONFLICT_RULES.forEach(function(rule) {
+      if(rule.trigger === sel && selectedArr.indexOf(rule.blocks[0])>=0) {
+        if(!seen[rule.reason]){
+          seen[rule.reason]=true;
+          msgs.push({reason:rule.reason, rationale:rule.rationale||''});
+        }
+      }
+    });
+  });
+  return msgs;
+}
+
+/* ═══════════════════════════════════════════════
+   RULES ENGINE (json-rules-engine)
+   Handles: conflict detection + PCI indication resolution
+═══════════════════════════════════════════════ */
+
+var _rulesEngine = null;
+
+function buildRulesEngine() {
+  if(typeof RulesEngine === 'undefined') return null;
+  var engine = new RulesEngine.Engine([], { allowUndefinedFacts: true });
+
+  // ── Conflict rules: one rule per CONFLICT_RULES entry ──
+  CONFLICT_RULES.forEach(function(rule) {
+    rule.blocks.forEach(function(blocked) {
+      engine.addRule({
+        name: 'conflict:'+rule.trigger+':'+blocked,
+        conditions: {
+          all: [
+            { fact:'sels', operator:'contains', value:rule.trigger },
+            { fact:'sels', operator:'contains', value:blocked }
+          ]
+        },
+        event: {
+          type: 'conflict',
+          params: { selA:rule.trigger, selB:blocked, reason:rule.reason, rationale:rule.rationale||'' }
+        }
+      });
+    });
+  });
+
+  // ── PCI indication rules ──
+  // NSTEMI / UA → NSTE-ACS
+  engine.addRule({
+    name: 'pci:nste-acs',
+    conditions: { any: [
+      { fact:'acsChoice', operator:'equal', value:'nstemi' },
+      { fact:'acsChoice', operator:'equal', value:'ua' }
+    ]},
+    event: { type:'pci-indication', params:{ opts:['NSTE–ACS'], note:'NSTEMI/Unstable Angina maps to NSTE–ACS. Note: NSTEMI is only applicable when diagnosed ≤7 days prior to PCI.' }}
+  });
+
+  // STEMI + lytics successful
+  engine.addRule({
+    name: 'pci:stemi-lytics-success',
+    conditions: { all: [
+      { fact:'acsChoice', operator:'equal', value:'stemi' },
+      { fact:'stemi_lytics', operator:'equal', value:true },
+      { fact:'stemi_lytics_success', operator:'equal', value:true }
+    ]},
+    event: { type:'pci-indication', params:{ opts:['STEMI (after successful lytics)'], note:'PCI after full-dose thrombolysis with resolution of symptoms and ST changes — pharmacoinvasive strategy.' }}
+  });
+
+  // STEMI + lytics unsuccessful (rescue)
+  engine.addRule({
+    name: 'pci:stemi-rescue',
+    conditions: { all: [
+      { fact:'acsChoice', operator:'equal', value:'stemi' },
+      { fact:'stemi_lytics', operator:'equal', value:true },
+      { fact:'stemi_lytics_success', operator:'equal', value:false }
+    ]},
+    event: { type:'pci-indication', params:{ opts:['STEMI – Rescue (after unsuccessful lytics)'], note:'Rescue PCI after failed full-dose thrombolysis for persistent/recurrent ischemia, heart failure, or electrical instability.' }}
+  });
+
+  // STEMI + no lytics + immediate
+  engine.addRule({
+    name: 'pci:stemi-immediate',
+    conditions: { all: [
+      { fact:'acsChoice', operator:'equal', value:'stemi' },
+      { fact:'stemi_lytics', operator:'equal', value:false },
+      { fact:'stemi_immediate', operator:'equal', value:true }
+    ]},
+    event: { type:'pci-indication', params:{ opts:['STEMI – Immediate PCI for Acute STEMI'], note:'PCI performed emergently without delay after diagnosis. Includes unstable presentations ≤12 hours.' }}
+  });
+
+  // STEMI + no lytics + not immediate + ≤12 hrs + unstable
+  engine.addRule({
+    name: 'pci:stemi-unstable-lte12',
+    conditions: { all: [
+      { fact:'acsChoice', operator:'equal', value:'stemi' },
+      { fact:'stemi_lytics', operator:'equal', value:false },
+      { fact:'stemi_immediate', operator:'equal', value:false },
+      { fact:'stemi_sx_dur', operator:'equal', value:'lte12' },
+      { fact:'stemi_unstable', operator:'equal', value:true }
+    ]},
+    event: { type:'pci-indication', params:{ opts:['STEMI – Unstable (≤12 hrs from Sx)'], note:'Recurrent/persistent ischemia, heart failure, or ventricular arrhythmia present within ≤12 hours of symptom onset.' }}
+  });
+
+  // STEMI + no lytics + not immediate + ≤12 hrs + stable
+  engine.addRule({
+    name: 'pci:stemi-stable-lte12',
+    conditions: { all: [
+      { fact:'acsChoice', operator:'equal', value:'stemi' },
+      { fact:'stemi_lytics', operator:'equal', value:false },
+      { fact:'stemi_immediate', operator:'equal', value:false },
+      { fact:'stemi_sx_dur', operator:'equal', value:'lte12' },
+      { fact:'stemi_unstable', operator:'equal', value:false }
+    ]},
+    event: { type:'pci-indication', params:{ opts:['STEMI – Stable (≤12 hrs from Sx)'], note:'No recurrent ischemia, heart failure, or electrical instability. Symptom onset ≤12 hours before PCI.' }}
+  });
+
+  // STEMI + no lytics + not immediate + >12 hrs + unstable
+  engine.addRule({
+    name: 'pci:stemi-unstable-gt12',
+    conditions: { all: [
+      { fact:'acsChoice', operator:'equal', value:'stemi' },
+      { fact:'stemi_lytics', operator:'equal', value:false },
+      { fact:'stemi_immediate', operator:'equal', value:false },
+      { fact:'stemi_sx_dur', operator:'equal', value:'gt12' },
+      { fact:'stemi_unstable', operator:'equal', value:true }
+    ]},
+    event: { type:'pci-indication', params:{ opts:['STEMI – Unstable (>12 hrs from Sx)'], note:'Recurrent/persistent ischemia, heart failure, or ventricular arrhythmia present more than 12 hours after symptom onset.' }}
+  });
+
+  // STEMI + no lytics + not immediate + >12 hrs + stable
+  engine.addRule({
+    name: 'pci:stemi-stable-gt12',
+    conditions: { all: [
+      { fact:'acsChoice', operator:'equal', value:'stemi' },
+      { fact:'stemi_lytics', operator:'equal', value:false },
+      { fact:'stemi_immediate', operator:'equal', value:false },
+      { fact:'stemi_sx_dur', operator:'equal', value:'gt12' },
+      { fact:'stemi_unstable', operator:'equal', value:false }
+    ]},
+    event: { type:'pci-indication', params:{ opts:['STEMI – Stable (>12 hrs from Sx)'], note:'No recurrent ischemia, heart failure, or electrical instability. Symptom onset >12 hours before PCI.' }}
+  });
+
+  // Non-ACS PCI indications
+  engine.addRule({
+    name: 'pci:cardiac-arrest',
+    conditions: { all:[{ fact:'sels', operator:'contains', value:'rca' }]},
+    event: { type:'pci-indication', params:{ opts:['Other'], note:'Resuscitated Cardiac Arrest → PCI Indication: Other.' }}
+  });
+  engine.addRule({
+    name: 'pci:worsening-angina',
+    conditions: { all:[{ fact:'sels', operator:'contains', value:'wora' },{ fact:'hasACS', operator:'equal', value:false }]},
+    event: { type:'pci-indication', params:{ opts:['Stable Angina'], note:'Worsening Angina → PCI Indication: Stable Angina.' }}
+  });
+  engine.addRule({
+    name: 'pci:new-onset-angina',
+    conditions: { all:[{ fact:'sels', operator:'contains', value:'noa' },{ fact:'hasACS', operator:'equal', value:false }]},
+    event: { type:'pci-indication', params:{ opts:['New Onset Angina ≤22 months'], note:'New Onset Angina ≤22 months → PCI Indication: New Onset Angina ≤22 months.' }}
+  });
+  engine.addRule({
+    name: 'pci:stable-known-cad',
+    conditions: { all:[{ fact:'sels', operator:'contains', value:'skcad' },{ fact:'hasACS', operator:'equal', value:false }]},
+    event: { type:'pci-indication', params:{ opts:['Stable Angina','CAD (without ischemic Sx)'], note:'Stable Known CAD: Stable Angina if anginal symptoms present, CAD without ischemic Sx if no symptoms.', needsAnginaCheck:true }}
+  });
+  engine.addRule({
+    name: 'pci:other',
+    conditions: { all:[{ fact:'hasOther', operator:'equal', value:true },{ fact:'hasACS', operator:'equal', value:false }]},
+    event: { type:'pci-indication', params:{ opts:['Other'], note:'Non-coronary/structural/evaluation indications → PCI Indication: Other.' }}
+  });
+
+  return engine;
+}
+
+/* Run engine synchronously via callback capture */
+function runEngineSync(facts, eventType) {
+  if(!_rulesEngine) _rulesEngine = buildRulesEngine();
+  if(!_rulesEngine) return [];
+  var results = [];
+  _rulesEngine.run(facts).then(function(result) {
+    result.events.filter(function(e){ return e.type===eventType; }).forEach(function(e){
+      results.push(e.params);
+    });
+  });
+  return results; // Note: populated synchronously since json-rules-engine resolves immediately for sync facts
+}
+
+/* Get all currently selected indication values across all fields for a visit */
+function getAllCurrentSels(v) {
+  var all = [];
+  // derive acs24/acsgt from new acs_type + acs_timing for conflict checking
+  var _acsChoice=(v.acs_type||[]).length>0?v.acs_type[0]:null;
+  if(_acsChoice&&_acsChoice!=='acs_no'&&v.acs_timing){
+    if(v.acs_timing==='lte24') all.push('acs24');
+    else if(v.acs_timing==='gt24') all.push('acsgt');
+  }
+  if(v.angina_hx===false) all.push('noa');
+  if(v.angina_hx===true && v.angina_worse===true) all.push('wora');
+  // angina_worse===false alone does not confirm skcad — CAD History must confirm cad_hx===true
+  if(v.cad_hx===true && v.cad_stable===true) all.push('skcad');
+  if(v.angina_worse===false&&all.indexOf('skcad')<0) all.push('skcad');
+  if(v.arrest_yn===true) all.push('rca');
+  (v.nonisch_sel||[]).forEach(function(s){ if(s!=='other'&&all.indexOf(s)<0) all.push(s); });
+  (v.other_sel||[]).forEach(function(s){ if(all.indexOf(s)<0) all.push(s); });
+  (v.noncardiac_sel||[]).forEach(function(s){ if(all.indexOf(s)<0) all.push(s); });
+  (v.susp_sel||[]).forEach(function(s){ if(all.indexOf(s)<0) all.push(s); });
+  return all;
+}
+
+/* ══════════════════════════════════════════
+   INIT / NAV
+══════════════════════════════════════════ */
+function initVisits(n, types) {
+  S.n=n; S.visits=[]; S.cur=0;
+  for(var i=0;i<n;i++) S.visits.push(blank(types?types[i]:'diag'));
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('main').classList.add('with-vbar');
+  document.getElementById('gen-dock').classList.add('on');
+  document.getElementById('guide-layout').style.display='flex';
+  document.getElementById('sel-sidebar').classList.add('on');
+  buildVisitBar();
+  renderThread(0);
+}
+
+function addVisit(){
+  var popup=document.getElementById('add-type-popup');
+  // Position near + button in visit bar
+  var bar=document.getElementById('visit-bar');
+  var barRect=bar.getBoundingClientRect();
+  popup.style.top=(barRect.bottom+6)+'px';
+  popup.style.right='16px';
+  popup.style.left='auto';
+  popup.classList.add('on');
+}
+
+function hardReset(){
+  S={n:0,visits:[],cur:0};
+  SETUP={n:0,types:[]};
+  document.getElementById('welcome').style.display='flex';
+  document.getElementById('wc-step1').style.display='block';
+  document.getElementById('wc-step2').classList.remove('on');
+  document.getElementById('chat-area').innerHTML='';
+  document.getElementById('chat-area').classList.remove('on');
+  document.getElementById('guide-layout').style.display='none';
+  document.getElementById('sel-sidebar').classList.remove('on');
+  document.getElementById('visit-bar').classList.remove('on');
+  document.getElementById('main').classList.remove('with-vbar');
+  document.getElementById('gen-dock').classList.remove('on');
+}
+
+function switchVisit(idx){
+  S.cur=idx;
+  buildVisitBar();
+  renderThread(idx);
+  // preserve scroll position when switching visits
+  document.getElementById('chat-area').classList.add('on');
+}
+
+function buildVisitBar(){
+  var bar=document.getElementById('visit-bar');
+  bar.innerHTML='';
+  bar.classList.add('on');
+  for(var i=0;i<S.n;i++){
+    (function(idx){
+      var v=S.visits[idx];
+      var hasSel=getSels(idx).length>0;
+      var typeLabel=v.caseType==='pci'?'PCI':'Diagnostic Only';
+      var t=document.createElement('div');
+      t.className='vb-tab'+(idx===S.cur?' on':'')+(hasSel?' done':'');
+      t.innerHTML='<span class="vb-dot"></span>Visit '+(idx+1)+' &mdash; '+typeLabel;
+      t.onclick=function(){ switchVisit(idx); };
+      bar.appendChild(t);
+    })(i);
+  }
+  var sep=document.createElement('div'); sep.className='vb-sep';
+  bar.appendChild(sep);
+  var add=document.createElement('button'); add.className='vb-add'; add.textContent='+';
+  add.title='Add another visit'; add.onclick=addVisit;
+  bar.appendChild(add);
+}
+
+/* ══════════════════════════════════════════
+   RENDER THREAD
+══════════════════════════════════════════ */
+function renderThread(idx){
+  var el=document.getElementById('chat-area');
+  el.classList.add('on');
+  el.innerHTML=buildThread(idx);
+  // Attach delegated listener for all card interactions
+  el.onclick=function(e){
+    // Walk up from clicked element to find action target
+    var t=e.target;
+    while(t&&t!==el){
+      var action=t.getAttribute('data-action');
+      if(action){
+        e.stopPropagation();
+        // Find the card containing this element to get visitIdx
+        var card=t;
+        while(card&&card!==el&&!card.getAttribute('data-visit')) card=card.parentNode;
+        var visitIdx=card?parseInt(card.getAttribute('data-visit')):S.cur;
+
+        var field=t.getAttribute('data-field');
+        var val=t.getAttribute('data-val');
+        var blocked=t.getAttribute('data-blocked');
+
+        if(action==='yn'){
+          if(blocked) return;
+          var parsed=JSON.parse(decodeURIComponent(val));
+          pickYN(visitIdx, field, parsed);
+        }
+        else if(action==='excl'){
+          if(blocked) return;
+          pickExclusive(visitIdx, field, val);
+        }
+        else if(action==='excl-confirm'){
+          confirmMultiExclusive(visitIdx, field);
+        }
+        else if(action==='multi'){
+          if(blocked) return;
+          togMulti(visitIdx, field, val);
+        }
+        else if(action==='multi-confirm'){
+          var done=t.getAttribute('data-done');
+          confirmMulti(visitIdx, done);
+        }
+        else if(action==='wc-def'){
+          e.stopPropagation(); e.preventDefault();
+          var defId=t.getAttribute('data-defid');
+          var hideId=t.getAttribute('data-hideid');
+          var panel=document.getElementById(defId);
+          var hidePanel=document.getElementById(hideId);
+          if(hidePanel) hidePanel.classList.remove('open');
+          if(panel){
+            var wasOpen=panel.classList.contains('open');
+            panel.classList.toggle('open',!wasOpen);
+          }
+          return;
+        }
+        else if(action==='ind-def'){
+          e.stopPropagation(); e.preventDefault();
+          var defId=t.getAttribute('data-defid');
+          var panel=document.getElementById(defId);
+          if(panel){
+            var isOpen=panel.classList.contains('open');
+            var grid=panel.closest('.check-grid');
+            if(grid) grid.querySelectorAll('.ind-def-panel.open').forEach(function(p){ p.classList.remove('open'); });
+            if(!isOpen) panel.classList.add('open');
+          }
+          return;
+        }
+        return;
+      }
+      t=t.parentNode;
+    }
+  };
+  // Update live sidebar and results
+  renderSidebar();
+  renderResults();
+  // Scroll to next unanswered card (not page top)
+  setTimeout(function(){
+    var cards=el.querySelectorAll('.q-card');
+    // Find the active (first unanswered) card — it has no .answered class
+    // We just scroll it into view gently from bottom
+    if(cards.length){
+      var last=cards[cards.length-1];
+      last.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+  },80);
+}
+
+function buildThread(idx){
+  var v=S.visits[idx];
+  var h='';
+  var steps=getSteps(idx);
+  var reopened=v.reopenedStep; // step index being re-edited, or -1
+
+  // Find the first unanswered step index (excluding dividers/blocked/skip)
+  var firstUnanswered=-1;
+  for(var i=0;i<steps.length;i++){
+    var s=steps[i];
+    if(s.divider||s.blocked||s.skip) continue;
+    if(s.getAnswer(v)===null){ firstUnanswered=i; break; }
+  }
+
+  var stepIdx=0; // counter for non-divider steps (used for reopen data-step)
+
+  for(var i=0;i<steps.length;i++){
+    var step=steps[i];
+
+    if(step.divider){
+      h+=sectionDivider(step.icon,step.label);
+      continue;
+    }
+    if(step.blocked){
+      h+=blockedNote(step.blockedMsg);
+      continue;
+    }
+    if(step.skip){
+      h+=skipNote(step.skipMsg);
+      continue;
+    }
+
+    var myStepIdx=stepIdx++;
+    var ans=step.getAnswer(v);
+    var isAnswered=ans!==null;
+    var isReopened=reopened===myStepIdx;
+    var isPending=!isAnswered&&!isReopened&&(firstUnanswered<myStepIdx||(firstUnanswered!==myStepIdx));
+
+    if(i===firstUnanswered){
+      // Show conflict warnings before the first unanswered question
+      var conflicts=getConflictWarnings(idx);
+      conflicts.forEach(function(msg){
+        var labelA=LABELS[msg.selA]||msg.selA;
+        var labelB=LABELS[msg.selB]||msg.selB;
+        h+='<div class="conflict-banner">'+
+          '<span class="conflict-banner-icon">&#9888;</span>'+
+          '<div class="conflict-banner-body">'+
+            '<strong>Conflicting selections: “'+labelA+'” and “'+labelB+'”</strong>'+
+            (msg.rationale?'<div class="conflict-banner-msg">'+msg.rationale+'</div>':'')+
+            '<div class="conflict-banner-action">&#8593; Edit one of the answers above to resolve the conflict.</div>'+
+          '</div>'+
+        '</div>';
+      });
+      h+=openCard(step,idx,v,true);
+    } else if(isAnswered){
+      // Keep open so the user can see and change their selection
+      h+=openCard(step,idx,v);
+      if(step.chipAlert) h+=chipAlert(step.chipAlert(v));
+    } else {
+      // Future locked step — show as dim placeholder
+      h+='<div class="q-pending"><span class="q-pending-dot"></span>'+(step.chipLabel||step.q)+'</div>';
+    }
+  }
+
+
+  // ── Next Visit button (shown when a subsequent visit exists) ──
+  if(S.n>1&&idx<S.n-1){
+    var nextIdx=idx+1;
+    var nextV=S.visits[nextIdx];
+    var nextLabel=nextV.caseType==='pci'?'PCI':'Diagnostic Only';
+    h+='<button class="next-visit-btn" onclick="switchVisit('+nextIdx+')">'+
+       '<span class="nvb-label">Continue to Visit '+(nextIdx+1)+' — '+nextLabel+'</span>'+
+       '<span class="nvb-arrow">&#8594;</span>'+'</button>';
+  }
+  return h;
+}
+
+/* ══════════════════════════════════════════
+   STEP DEFINITIONS
+══════════════════════════════════════════ */
+function getSteps(idx){
+  var v=S.visits[idx];
+  var isFirst=idx===0;
+  var acsBlk=acsBlocked(idx);
+  var suspBlk=suspBlocked(idx);
+  var steps=[];
+
+  if(!isFirst){
+    steps.push({divider:true, icon:'&#8644;', label:'Visit '+(idx+1)+' — Encounter Context'});
+
+    // Staged PCI: only ask if there are multiple PCI visits AND this is not the first PCI visit
+    var pciVisits=S.visits.filter(function(vv){ return vv.caseType==='pci'; });
+    var firstPCIIdx=-1;
+    for(var _fi=0;_fi<S.visits.length;_fi++){ if(S.visits[_fi].caseType==='pci'){ firstPCIIdx=_fi; break; } }
+    var showStaged = v.caseType==='pci' && pciVisits.length>1 && idx!==firstPCIIdx;
+
+    if(showStaged){
+      steps.push({
+        id:'staged',
+        q:'Is this a staged PCI?',
+        hint:'A staged PCI is a planned, separate procedure on a different vessel from the initial PCI, typically scheduled within 90 days.',
+        chipLabel:'Staged PCI?',
+        type:'yn',
+        opts:[{val:false,lbl:'No'},{val:true,lbl:'Yes — Staged PCI'}],
+        getAnswer:function(v){ return v.staged; },
+        chipAnswer:function(v){ return v.staged?'Yes — Staged PCI':'No'; },
+        chipAlert:function(v){ return null; }
+      });
+    }
+
+    // Prior visit had ACS — ask if a new ACS episode occurred before gating ACS
+    if(!isFirst && priorVisitHadACS(idx) && v.staged!==true){
+      var prevIdx=idx-1;
+      var prevAcsSels=getSels(prevIdx).filter(function(s){return s==='acs24'||s==='acsgt';});
+      var prevAcsLabel=prevAcsSels.indexOf('acs24')>=0?'ACS ≤24 hrs':(prevAcsSels.indexOf('acsgt')>=0?'ACS >24 hrs':'ACS');
+      steps.push({
+        id:'newAcsEpisode',
+        q:'Did the patient have a new ACS episode after Visit '+(idx)+'?',
+        hint:'The prior ACS event is closed after PCI. A new episode requires separate documentation: new symptoms, new ECG changes, or new troponin elevation occurring after the prior PCI.',
+        chipLabel:'New ACS episode since Visit '+idx+'?',
+        type:'yn',
+        opts:[
+          {val:true, lbl:'Yes — new, documented ACS episode'},
+          {val:false, lbl:'No — same or no new ACS event'}
+        ],
+        getAnswer:function(v){ return v.newAcsEpisode; },
+        chipAnswer:function(v){ return v.newAcsEpisode?'Yes — New ACS episode':'No — ACS not re-applicable'; },
+        chipAlert:function(v){
+          if(v.newAcsEpisode===true) return {cls:'ia-ok',icon:'&#10003;',msg:'New ACS episode confirmed — ACS indications are available for this visit.'};
+          if(v.newAcsEpisode===false) return {cls:'ia-warn',icon:'&#9888;',msg:'<strong>ACS is not re-applicable.</strong> The prior ACS event closed at Visit '+idx+'. Code the current indication (typically <strong>Stable Known CAD</strong> for a staged/planned follow-up).'};
+          return null;
+        }
+      });
+    }
+
+  }
+
+  // ── ACS ──
+  steps.push({divider:true, icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 36 18\" width=\"36\" height=\"18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"0,9 6,9 8,7 10,11 13,1 15,17 17,9 22,9 24,7 26,9 36,9\"/></svg>', label:'Acute Coronary Syndrome'});
+
+  if(acsBlk){
+    var acsBlockReason='ACS indications are not available for this visit.';
+    if(v.staged===true) acsBlockReason='<strong>Staged PCI:</strong> The prior ACS event is closed. Code the current stable indication — typically <strong>Stable Known CAD</strong> — unless new acute symptoms are documented.';
+
+    else if(priorVisitHadACS(idx)&&v.newAcsEpisode===false) acsBlockReason='<strong>Prior ACS event is closed.</strong> No new ACS episode was documented after Visit '+(idx)+'. Code the current indication \u2014 typically <strong>Stable Known CAD</strong>.';
+    steps.push({blocked:true, blockedMsg:acsBlockReason});
+  } else {
+    // Single exclusive ACS type selection
+    steps.push({
+      id:'acs_type',
+      field:'acs_type',
+      q:(priorVisitHadACS(idx)?'What type of ACS is documented for this new episode?':'Is the patient being brought to the Cath Lab for:'),
+      
+      chipLabel:'ACS type',
+      type:'yn',
+      opts:[
+        {val:'stemi',  lbl:'STEMI'},
+        {val:'nstemi', lbl:'NSTEMI'},
+        {val:'ua',     lbl:'Unstable Angina'},
+        {val:'acs_no', lbl:'No ACS \u2014 move to next question'}
+      ],
+      getAnswer:function(v){ return v.acs_type.length>0?v.acs_type[0]:null; },
+      chipAnswer:function(v){ var m={stemi:'STEMI',nstemi:'NSTEMI',ua:'Unstable Angina',acs_no:'No ACS'}; return m[v.acs_type[0]]||v.acs_type[0]; }
+    });
+
+    // ACS timing — shown for STEMI, NSTEMI, UA (not for acs_no)
+    var acsChoice = v.acs_type.length>0 ? v.acs_type[0] : null;
+    if(acsChoice && acsChoice!=='acs_no'){
+      steps.push({
+        id:'acs_timing',
+        q:(function(){ var labels={stemi:'STEMI',nstemi:'NSTEMI',ua:'Unstable Angina'}; return 'When was '+(labels[acsChoice]||'the ACS')+' diagnosed?'; })(),
+        hint:(function(){ var labels={stemi:'STEMI',nstemi:'NSTEMI',ua:'Unstable Angina'}; return 'Use the time from <strong>'+(labels[acsChoice]||'ACS')+' diagnosis</strong> to Cath Lab arrival — not symptom onset.'; })(),
+        chipLabel:'ACS timing',
+        type:'yn',
+        opts:[
+          {val:'lte24', lbl:'\u226424 hours prior to Cath Lab'},
+          {val:'gt24',  lbl:'>24 hours prior to Cath Lab'}
+        ],
+        getAnswer:function(v){ return v.acs_timing; },
+        chipAnswer:function(v){ return v.acs_timing==='lte24'?'≤24 hrs':'>24 hrs'; },
+        alerts:function(v){
+          if(v.acs_timing==='gt24'){
+            return [{cls:'ia-info',icon:'&#9432;',msg:'<strong>STEMI/NSTEMI ≤ 7 days:</strong> ACS >24 hrs is only applicable when the STEMI or NSTEMI occurred within 7 days of symptom onset. If symptoms began more than 7 days ago, the ACS event is considered closed — code the current condition instead.'}];
+          }
+          return [];
+        }
+      });
+
+      // STEMI-specific detail questions
+      if(acsChoice==='stemi' && v.acs_timing!==null && v.caseType==='pci'){
+        steps.push({divider:true, icon:'&#9889;', label:'STEMI Details'});
+
+        // Q1: Were lytics given?
+        steps.push({
+          id:'stemi_lytics',
+          q:'Were thrombolytics (lytics) given before this PCI?',
+          hint:'Full-dose thrombolysis changes the PCI indication regardless of whether it was successful.',
+          chipLabel:'Lytics given?',
+          type:'yn',
+          opts:[
+            {val:true,  lbl:'Yes \u2014 full-dose thrombolytics administered'},
+            {val:false, lbl:'No \u2014 no thrombolytics given'}
+          ],
+          getAnswer:function(v){ return v.stemi_lytics; },
+          chipAnswer:function(v){ return v.stemi_lytics?'Lytics: Yes':'Lytics: No'; }
+        });
+
+        if(v.stemi_lytics===true){
+          // Q2a: Were lytics successful?
+          steps.push({
+            id:'stemi_lytics_success',
+            q:'Were the thrombolytics successful?',
+            hint:'<strong>Successful:</strong> Symptoms and ST changes resolved after full-dose thrombolysis.<br><strong>Unsuccessful:</strong> Persistent or recurrent ischemia, heart failure, or arrhythmia remained after full-dose thrombolysis (Rescue PCI)',
+            chipLabel:'Lytics outcome',
+            type:'yn',
+            opts:[
+              {val:true,  lbl:'Yes \u2014 successful (symptoms/ST resolved)'},
+              {val:false, lbl:'No \u2014 unsuccessful (persistent/recurrent ischemia)'}
+            ],
+            getAnswer:function(v){ return v.stemi_lytics_success; },
+            chipAnswer:function(v){ return v.stemi_lytics_success?'Lytics: Successful':'Lytics: Unsuccessful (Rescue)'; }
+          });
+        }
+
+        if(v.stemi_lytics===false){
+          // Q2b: Was PCI immediate after diagnosis?
+          steps.push({
+            id:'stemi_immediate',
+            q:'Was the PCI performed immediately after STEMI diagnosis?',
+            hint:'Immediate means emergently, without any delay after diagnosis — even if symptoms were ≤12 hours. If there was any delay between diagnosis and starting the PCI, select No.',
+            chipLabel:'Immediate PCI?',
+            type:'yn',
+            opts:[
+              {val:true,  lbl:'Yes \u2014 emergent, no delay after diagnosis'},
+              {val:false, lbl:'No \u2014 there was a delay after diagnosis'}
+            ],
+            getAnswer:function(v){ return v.stemi_immediate; },
+            chipAnswer:function(v){ return v.stemi_immediate?'Immediate: Yes':'Immediate: No'; }
+          });
+
+          if(v.stemi_immediate===false){
+            // Q3: Symptom duration
+            steps.push({
+              id:'stemi_sx_dur',
+              q:'How long had symptoms been present at the time of PCI?',
+              hint:'Measure from <strong>symptom onset</strong> to the time PCI was performed.',
+              chipLabel:'Symptom duration',
+              type:'yn',
+              opts:[
+                {val:'lte12', lbl:'\u226412 hours from symptom onset'},
+                {val:'gt12',  lbl:'>12 hours from symptom onset'}
+              ],
+              getAnswer:function(v){ return v.stemi_sx_dur; },
+              chipAnswer:function(v){ return v.stemi_sx_dur==='lte12'?'\u226412 hrs':'>12 hrs'; }
+            });
+
+            // Q4: Stability (only if sx > 12 hrs OR symptoms present)
+            if(v.stemi_sx_dur!==null){
+              steps.push({
+                id:'stemi_unstable',
+                q:'At the time of PCI, was the patient experiencing any of the following?',
+                hint:'Recurrent or persistent ischemia &nbsp;•&nbsp; Heart failure signs or symptoms &nbsp;•&nbsp; Ventricular arrhythmia',
+                chipLabel:'Instability?',
+                type:'yn',
+                opts:[
+                  {val:true,  lbl:'Yes \u2014 one or more of the above present (Unstable)'},
+                  {val:false, lbl:'No \u2014 none present (Stable)'}
+                ],
+                getAnswer:function(v){ return v.stemi_unstable; },
+                chipAnswer:function(v){ return v.stemi_unstable?'Unstable':'Stable'; }
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ── ANGINA ──
+  steps.push({divider:true, icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 36 36\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M18,28 C18,28 6,20 6,13 C6,9 9,7 12,7 C14.5,7 16.5,8.5 18,10.5 C19.5,8.5 21.5,7 24,7 C27,7 30,9 30,13 C30,20 18,28 18,28Z\" fill=\"rgba(255,255,255,0.15)\"/><line x1=\"18\" y1=\"2\" x2=\"18\" y2=\"5\"/><line x1=\"10\" y1=\"4\" x2=\"12\" y2=\"6.5\"/><line x1=\"26\" y1=\"4\" x2=\"24\" y2=\"6.5\"/><line x1=\"6\" y1=\"9\" x2=\"8.5\" y2=\"10.5\"/><line x1=\"30\" y1=\"9\" x2=\"27.5\" y2=\"10.5\"/></svg>', label:'Angina'});
+
+  steps.push({
+    id:'angina_yn',
+    q:'Has the patient experienced Chest Pain or a documented anginal equivalent prior to this Cath Lab visit?',
+    chipLabel:'Angina/chest pain?',
+    type:'yn',
+    opts:[{val:true,lbl:'Yes'},{val:false,lbl:'No Angina — move to next question'}],
+    getAnswer:function(v){ return v.angina_yn; },
+    chipAnswer:function(v){ return v.angina_yn?'Yes':'No'; }
+  });
+  if(v.angina_yn===true){
+    steps.push({
+      id:'angina_hx',
+      q:'Does the patient have a history of prior MI, PCI, CABG, and/or a history of angina with onset >2 months prior to this Cath Lab visit?',
+      chipLabel:'Prior angina/CAD history?',
+      type:'yn',
+      opts:[{val:true,lbl:'Yes'},{val:false,lbl:'No — New Onset Angina'}],
+      getAnswer:function(v){ return v.angina_hx; },
+      chipAnswer:function(v){ return v.angina_hx?'Yes':'No — New Onset Angina'; },
+      chipAlert:function(v){
+        if(v.angina_hx===false) return {cls:'ia-ok',icon:'&#10003;','msg':'<strong>New Onset Angina ≤ 2 months</strong> applies to this visit.'};
+        return null;
+      }
+    });
+    if(v.angina_hx===true){
+      steps.push({
+        id:'angina_worse',
+        q:'Has the patient’s angina changed in frequency, pattern or severity over the past 2 months?',
+        chipLabel:'Angina worsened?',
+        type:'yn',
+        opts:[{val:true,lbl:'Yes — Worsening Angina'},{val:false,lbl:'No — Stable Known CAD'}],
+        getAnswer:function(v){ return v.angina_worse; },
+        chipAnswer:function(v){ return v.angina_worse?'Yes — Worsening Angina':'No — Stable Known CAD'; },
+        chipAlert:function(v){
+          if(v.angina_worse===true) return {cls:'ia-ok',icon:'&#10003;','msg':'<strong>Worsening Angina</strong> applies to this visit.'};
+          if(v.angina_worse===false) return {cls:'ia-ok',icon:'&#10003;','msg':'Stable, unchanged angina pattern. See CAD History below — if the patient has documented CAD ≥50%, <strong>Stable Known CAD</strong> may apply.'};
+          return null;
+        }
+      });
+    }
+  }
+
+  // ── CAD HISTORY ──
+  // Skip if Stable Known CAD already determined from angina pathway
+  var skippedByAngina = v.angina_worse===false;
+  steps.push({divider:true, icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 36 18\" width=\"36\" height=\"18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M0,4 C6,4 10,7.5 18,7.5 C26,7.5 30,4 36,4\"/><path d=\"M0,14 C6,14 10,10.5 18,10.5 C26,10.5 30,14 36,14\"/><path d=\"M17,7.5 L17,10.5 M19,7.5 L19,10.5\" stroke-width=\"1.2\" opacity=\"0.6\"/></svg>', label:'CAD History'});
+  if(skippedByAngina){
+    steps.push({skip:true, skipMsg:'<strong>Stable Known CAD</strong> confirmed via Angina section — CAD History questions are not required.'});
+  } else {
+  steps.push({
+    id:'cad_hx',
+    q:'Does the patient have a documented history of CAD?',
+    hint:(idx===0?'Select Yes for: prior MI, prior PCI, prior CABG, ≥50% stenosis on cath, or obstructive CAD on cardiac CTA. Angina symptoms alone do not count.':'Select Yes for: prior MI, PCI, CABG, obstructive CAD on cardiac CTA, or ≥50% stenosis on cath (includes findings from the cath lab visit prior to this one in the same encounter).'),
+    chipLabel:'Documented CAD history?',
+    type:'yn',
+    opts:[{val:true,lbl:'Yes — documented CAD history'},{val:false,lbl:'No — no documented CAD'}],
+    getAnswer:function(v){ return v.cad_hx; },
+    chipAnswer:function(v){ return v.cad_hx?'Yes — documented CAD':'No documented CAD'; },
+    chipAlert:function(v){
+      if(v.cad_hx===false&&suspBlocked(idx)) return {cls:'ia-warn',icon:'&#9888;',msg:'<strong>Suspected CAD is blocked</strong> — a prior visit confirmed CAD ≥50%.'};
+      return null;
+    }
+  });
+  if(v.cad_hx===false&&!suspBlk){
+    steps.push({
+      id:'susp_yn',
+      q:'Does Suspected CAD apply here?',
+      hint:'Only available when there is no prior documented CAD ≥50% and no prior PCI/CABG. Not available once CAD has been confirmed on a prior visit.',
+      chipLabel:'Suspected CAD?',
+      type:'yn',
+      opts:[{val:true,lbl:'Yes — Suspected CAD'},{val:false,lbl:'No — does not apply'}],
+      getAnswer:function(v){ return v.susp_yn; },
+      chipAnswer:function(v){ return v.susp_yn?'Yes — Suspected CAD':'No'; },
+      chipAlert:function(v){
+        if(v.susp_yn===true) return {cls:'ia-ok',icon:'&#10003;',msg:'<strong>Suspected CAD</strong> added as an indication for this visit.'};
+        return null;
+      }
+    });
+  }
+  if(v.cad_hx===true){
+    steps.push({
+      id:'cad_stable',
+      q:'Is the patient currently hemodynamically stable?',
+      hint:'Stable = no ACS signs/symptoms, no new-onset or worsening angina, no hemodynamic instability, and any angina pattern unchanged for ≥6 weeks.',
+      chipLabel:'Patient stable?',
+      type:'yn',
+      opts:[{val:true,lbl:'Yes — Stable Known CAD'},{val:false,lbl:'No — unstable'}],
+      getAnswer:function(v){ return v.cad_stable; },
+      chipAnswer:function(v){ return v.cad_stable?'Yes — Stable Known CAD':'No — Unstable'; },
+      chipAlert:function(v){
+        if(v.cad_stable===true) return {cls:'ia-ok',icon:'&#10003;',msg:'<strong>Stable Known CAD</strong> applies to this visit.'};
+        if(v.cad_stable===false) return {cls:'ia-warn',icon:'&#9888;',msg:'Known CAD but unstable — do <em>not</em> select Stable Known CAD. Continue to identify the current acute condition.'};
+        return null;
+      }
+    });
+  }
+
+  } // end else (CAD History shown)
+
+  // ── CARDIAC ARREST ──
+  steps.push({divider:true, icon:'&#9889;', label:'Cardiac Arrest'});
+  steps.push({
+    id:'arrest_yn',
+    q:'Is the patient being brought to the Cath Lab following a cardiac arrest?',
+    chipLabel:'Post-cardiac arrest?',
+    type:'yn',
+    opts:[{val:true,lbl:'Yes — Resuscitated Cardiac Arrest'},{val:false,lbl:'No — continue to next question'}],
+    getAnswer:function(v){ return v.arrest_yn; },
+    chipAnswer:function(v){ return v.arrest_yn?'Yes — Resuscitated Cardiac Arrest':'No'; },
+    chipAlert:function(v){
+      if(v.arrest_yn===true){
+        if(idx>0 && v.caseType==='pci'){
+          for(var _p=0;_p<idx;_p++){
+            if(S.visits[_p].caseType==='pci' && getSels(_p).indexOf('rca')>=0){
+              return {cls:'ia-warn',icon:'&#9888;',msg:'<strong>Resuscitated Cardiac Arrest</strong> was coded on a prior PCI visit in this encounter. PCI closes all indications — only re-select if a <em>new cardiac arrest</em> is documented after that visit.'};
+            }
+          }
+        }
+        return {cls:'ia-ok',icon:'&#10003;','msg':'<strong>Resuscitated Cardiac Arrest</strong> applies to this visit.'};
+      }
+      return null;
+    }
+  });
+
+  // ── NON-ISCHEMIC ──
+  steps.push({divider:true, icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 36 36\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M18,31 C18,31 5,22 5,13.5 C5,8.5 8.5,6 12,6 C14.5,6 16.5,7.5 18,9.5 C19.5,7.5 21.5,6 24,6 C27.5,6 31,8.5 31,13.5 C31,22 18,31 18,31Z\" fill=\"rgba(255,255,255,0.12)\"/><line x1=\"18\" y1=\"6\" x2=\"18\" y2=\"31\"/><path d=\"M8,17 Q13,15 18,17 Q23,15 28,17\" fill=\"none\"/></svg>', label:'Non-Ischemic / Structural'});
+  steps.push({
+    id:'nonisch',
+    q:'Is this visit for a non-ischemic or structural cardiac condition?',
+    hint:'Select only conditions that are <strong>actively driving this visit</strong>, not incidental findings or history.',
+    chipLabel:'Non-ischemic / Structural',
+    type:'multi_confirm',
+    field:'nonisch_sel',
+    doneField:'nonisch_seen',
+    opts:[
+      {val:'valv',lbl:'Valvular Disease'},
+      {val:'peri',lbl:'Pericardial Disease'},
+      {val:'arrh',lbl:'Cardiac Arrhythmia'},
+      {val:'cmp',lbl:'Cardiomyopathy'},
+      {val:'lvd',lbl:'LV Dysfunction'},
+      {val:'sync',lbl:'Syncope'},
+      {val:'txpl',lbl:'Post Cardiac Transplant'}
+    ],
+    getAnswer:function(v){ return v.nonisch_seen?v.nonisch_sel:null; },
+    chipAnswer:function(v){ return v.nonisch_sel.length?v.nonisch_sel.map(function(s){ return LABELS[s]||s; }).join(', '):'None selected'; },
+    alerts:function(v){
+      var a=[];
+      // Warn only when current visit duplicates a non-ischemic indication from a prior PCI visit
+      if(idx>0 && v.caseType==='pci' && v.nonisch_sel.length>0){
+        // Gather all non-ischemic/non-cardiac selections from prior PCI visits (exclude skcad)
+        var priorSels=[];
+        for(var _p=0;_p<idx;_p++){
+          if(S.visits[_p].caseType==='pci'){
+            var ps=getSels(_p);
+            ps.forEach(function(s){ if(s!=='skcad'&&priorSels.indexOf(s)<0) priorSels.push(s); });
+          }
+        }
+        // Find which current non-ischemic selections overlap with prior PCI indications
+        var dupes=v.nonisch_sel.filter(function(s){ return priorSels.indexOf(s)>=0; });
+        if(dupes.length>0){
+          var dupeLabels=dupes.map(function(s){ return '<strong>'+(LABELS[s]||s)+'</strong>'; }).join(', ');
+          a.push({cls:'ia-warn',icon:'&#9888;',msg:dupeLabels+' '+(dupes.length===1?'was':'were')+' coded on a prior PCI visit in this encounter. PCI closes all indications — only re-select if a <em>new, distinct episode</em> is separately documented after that visit.'});
+        }
+      }
+      if(v.nonisch_sel.indexOf('valv')>=0) a.push({cls:'ia-info',icon:'&#9432;','msg':'<strong>Valvular Disease:</strong> Select when evaluating severity or before valve repair/replacement/TAVR. TAVR evaluations &rarr; Valvular Disease, not Pre-Operative Evaluation.'});
+      if(v.nonisch_sel.indexOf('arrh')>=0) a.push({cls:'ia-info',icon:'&#9432;','msg':'A <strong>history only</strong> of arrhythmia does not qualify — it must be actively prompting this visit.'});
+      if(v.nonisch_sel.indexOf('cmp')>=0) a.push({cls:'ia-info',icon:'&#9432;','msg':'<strong>Cardiomyopathy</strong> must be explicitly stated as an indication by the physician.'});
+      if(v.nonisch_sel.indexOf('lvd')>=0) a.push({cls:'ia-info',icon:'&#9432;','msg':'<strong>LV Dysfunction</strong> is the best fit for Heart Failure-prompted visits.'});
+      if(v.nonisch_sel.indexOf('sync')>=0) a.push({cls:'ia-info',icon:'&#9432;','msg':'A <strong>history only</strong> of syncope does not qualify — it must be prompting this visit.'});
+      return a;
+    }
+  });
+
+  // ── NON-CARDIAC / EVAL ──
+  steps.push({divider:true, icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 36 36\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"8\" y=\"8\" width=\"20\" height=\"24\" rx=\"2\" fill=\"rgba(255,255,255,0.12)\"/><rect x=\"14\" y=\"5\" width=\"8\" height=\"5\" rx=\"1.5\"/><line x1=\"12\" y1=\"17\" x2=\"24\" y2=\"17\"/><line x1=\"12\" y1=\"22\" x2=\"20\" y2=\"22\"/><polyline points=\"12,28 15,26 18,24\"/><polyline points=\"15,26 18,29 24,23\"/></svg>', label:'Non-Cardiac / Evaluation'});
+  steps.push({
+    id:'noncardiac',
+    q:'Is this visit for a pre-operative evaluation or exercise clearance?',
+
+    chipLabel:'Non-cardiac / Evaluation',
+    type:'multi_confirm',
+    field:'noncardiac_sel',
+    doneField:'noncardiac_seen',
+    opts:[
+      {val:'preo',lbl:'Pre-Operative Evaluation'},
+      {val:'excc',lbl:'Eval. for Exercise Clearance'}
+    ],
+    getAnswer:function(v){ return v.noncardiac_seen?v.noncardiac_sel:null; },
+    chipAnswer:function(v){ return v.noncardiac_sel.length?v.noncardiac_sel.map(function(s){ return LABELS[s]||s; }).join(', '):'None selected'; },
+    alerts:function(v){
+      var a=[];
+      // Warn if duplicating a non-cardiac indication from a prior PCI visit
+      if(idx>0 && v.caseType==='pci' && v.noncardiac_sel.length>0){
+        var priorSels=[];
+        for(var _p=0;_p<idx;_p++){
+          if(S.visits[_p].caseType==='pci'){
+            var ps=getSels(_p);
+            ps.forEach(function(s){ if(s!=='skcad'&&priorSels.indexOf(s)<0) priorSels.push(s); });
+          }
+        }
+        var dupes=v.noncardiac_sel.filter(function(s){ return priorSels.indexOf(s)>=0; });
+        if(dupes.length>0){
+          var dupeLabels=dupes.map(function(s){ return '<strong>'+(LABELS[s]||s)+'</strong>'; }).join(', ');
+          a.push({cls:'ia-warn',icon:'&#9888;',msg:dupeLabels+' '+(dupes.length===1?'was':'were')+' coded on a prior PCI visit in this encounter. PCI closes all indications — only re-select if a <em>new, distinct episode</em> is separately documented after that visit.'});
+        }
+      }
+      if(v.noncardiac_sel.indexOf('preo')>=0) a.push({cls:'ia-info',icon:'&#9432;','msg':'<strong>TAVR evaluations</strong> should use <strong>Valvular Disease</strong>, not Pre-Operative Evaluation.'});
+      return a;
+    }
+  });
+
+  // ── SUSPECTED CAD ──
+  steps.push({divider:true, icon:'&#128269;', label:'Suspected CAD'});
+  if(suspBlk){
+    steps.push({blocked:true, blockedMsg:'<strong>Suspected CAD is blocked</strong> — a prior Cath Lab visit has already confirmed CAD \u226550%. Suspected CAD only applies when there is no prior documented CAD \u226550% and no prior PCI/CABG.'});
+  } else if(v.susp_yn!==null){
+    steps.push({skip:true, skipMsg:'Suspected CAD addressed in CAD History section above.'});
+  } else {
+    steps.push({
+      id:'susp',
+      q:'Does Suspected CAD apply to this visit?',
+      hint:'Use only when there is <strong>no prior documented CAD \u226550%</strong> and no prior PCI/CABG. Once CAD is confirmed on a prior visit, this option is no longer available.',
+      chipLabel:'Suspected CAD?',
+      type:'multi_confirm',
+      field:'susp_sel',
+      doneField:'susp_seen',
+      opts:[{val:'susp',lbl:'Suspected CAD'}],
+      getAnswer:function(v){ return v.susp_seen?v.susp_sel:null; },
+      chipAnswer:function(v){ return v.susp_sel.length?'Yes \u2014 Suspected CAD':'No'; },
+      alerts:function(){ return []; }
+    });
+  }
+
+  // ── OTHER ──
+  steps.push({divider:true, icon:'&bull;&bull;&bull;', label:'Other'});
+  steps.push({
+    id:'other',
+    q:'Does any other indication apply that is not listed above?',
+    hint:'Use Other only when no other category fits. An abnormal stress test alone does <em>not</em> support Other — identify the underlying condition instead.',
+    chipLabel:'Other?',
+    type:'multi_confirm',
+    field:'other_sel',
+    doneField:'other_seen',
+    opts:[{val:'other',lbl:'Other'}],
+    getAnswer:function(v){ return v.other_seen?(v.other_sel.indexOf('other')>=0?['other']:[]):null; },
+    chipAnswer:function(v){ return v.other_sel.indexOf('other')>=0?'Yes — Other':'No'; },
+    alerts:function(){ return []; }
+  });
+
+  return steps;
+}
+
+/* ══════════════════════════════════════════
+   HTML BUILDERS
+══════════════════════════════════════════ */
+var SECTION_COLORS = {
+  'Acute Coronary Syndrome': 'var(--acs-accent)',
+  'Angina': 'var(--angina-accent)',
+  'CAD History': 'var(--cad-accent)',
+  'Cardiac Arrest': 'var(--arrest-accent)',
+  'Non-Ischemic / Structural': 'var(--struct-accent)',
+  'Non-Cardiac / Evaluation': 'var(--eval-accent)',
+  'Suspected CAD': 'var(--susp-accent)',
+  'Other': 'var(--other-accent)',
+  'STEMI Details': '#C0392B'
+};
+function sectionDivider(icon,label){
+  var color='#101820';
+  return '<div class="s-divider">'+
+    '<div class="sd-accent" style="background:#FF6720"></div>'+
+    '<div class="sd-inner" style="background:'+color+';border-color:'+color+'"><span class="sd-icon" style="'+(icon.indexOf('<svg')>=0?'display:flex;align-items:center':'filter:brightness(10)')+'">' +icon+'</span><span class="sd-label">'+label+'</span></div>'+
+    '</div>';
+}
+function blockedNote(msg){
+  return '<div class="s-blocked"><span>&#9888;</span><span>'+msg+'</span></div>';
+}
+function skipNote(msg){
+  return '<div class="s-skip"><span>&#10003;</span><span>'+msg+'</span></div>';
+}
+function chipHTML(label,answer,stepI,visitIdx){
+  var ansStr=typeof answer==='string'?answer:(Array.isArray(answer)?answer.map(function(s){ return LABELS[s]||s; }).join(', '):'');
+  return '<div class="q-chip" data-action="reopen" data-step="'+stepI+'" data-visit="'+visitIdx+'" title="Click to edit">'+
+    '<span class="qc-label">'+label+'</span>'+
+    '<span class="qc-answer">'+ansStr+'</span>'+
+    '<span class="qc-edit">&#9998;</span>'+
+    '</div>';
+}
+/* Returns any active cross-section indication conflicts for a visit */
+function getConflictWarnings(idx) {
+  var sels = getSels(idx);
+  var warnings = [];
+  var seen = {};
+  sels.forEach(function(sel) {
+    CONFLICT_RULES.forEach(function(rule) {
+      if(rule.trigger === sel) {
+        rule.blocks.forEach(function(blocked) {
+          if(sels.indexOf(blocked) >= 0) {
+            var key = [sel, blocked].sort().join('|');
+            if(!seen[key]) {
+              seen[key] = true;
+              warnings.push({
+                reason: rule.reason,
+                rationale: rule.rationale||'',
+                selA: sel,
+                selB: blocked
+              });
+            }
+          }
+        });
+      }
+    });
+  });
+  return warnings;
+}
+
+function chipAlert(al){
+  if(!al) return '';
+  return '<div class="i-alert '+al.cls+'" style="margin:0 20px 8px;"><span class="ia-i">'+al.icon+'</span><span>'+al.msg+'</span></div>';
+}
+
+function openCard(step, idx, v, isActive){
+  var h='<div class="q-card'+(isActive?' q-card-active':'')+'" data-visit="'+idx+'">';
+  h+='<div class="qc-top"><div class="qc-q">'+step.q+'</div>';
+  if(step.hint) h+='<div class="qc-hint">'+step.hint+'</div>';
+  h+='</div>';
+
+  if(step.type==='yn'){
+    h+='<div class="qc-btns">';
+    // Step IDs where val:false is an affirmative clinical finding (should be green)
+    var falseIsGreen=['stemi_lytics','stemi_lytics_success','stemi_immediate',
+                      'stemi_unstable','stemi_shock','stemi_ischemia',
+                      'cad_stable'];
+    // Use getAnswer() so array-backed fields (acs_type) resolve correctly
+    var answered=step.getAnswer(v);
+    step.opts.forEach(function(o){
+      var isOn=(answered!==null)&&(
+        Array.isArray(answered) ? answered.indexOf(o.val)>=0 : answered===o.val
+      );
+      // Navy style: "No ACS" skip option, or val===false on non-affirmative steps
+      var isNavy=isOn&&(o.val==='acs_no'||(o.val===false&&falseIsGreen.indexOf(step.id)<0));
+      var cls='ans-btn'+(isOn?(isNavy?' on ans-btn-navy':' on'):'');
+      var dval=JSON.stringify(o.val);
+      h+='<button class="'+cls+'" '+
+          'data-action="yn" data-field="'+step.id+'" data-val="'+encodeURIComponent(dval)+'">'+
+          '<span class="ab-radio">'+(isOn?'&#10003;':'')+'</span>'+o.lbl+'</button>';
+    });
+    h+='</div>';
+    if(step.alerts){ step.alerts(v).forEach(function(a){ h+=chipAlert(a); }); }
+  }
+
+  if(step.type==='multi_exclusive'){
+    var curSels=getAllCurrentSels(v);
+    var blockInfo=getBlockedVals(curSels);
+    h+='<div class="check-grid">';
+    var exclDefId='def-'+step.id+'-'+idx;
+    step.opts.forEach(function(o){
+      var isSel=v[step.id].indexOf(o.val)>=0;
+      var isBlocked=!isSel&&blockInfo.blocked[o.val];
+      var conflictMsg=isBlocked?(blockInfo.reasons[o.val]||''):'';
+      var conflictRationale=isBlocked?(blockInfo.rationales[o.val]||''):'';
+      var cls='chk-btn'+(isSel?' on':'')+(isBlocked?' conflict-blocked':'');
+      var defPanelId='def-'+o.val+'-'+idx;
+      var def=DEFS[o.val]||'';
+      h+='<div class="'+cls+'" '+
+          'data-action="excl" data-field="'+step.id+'" data-val="'+o.val+'"'+
+          (isBlocked?' data-blocked="1"':'')+'>'+
+        '<span class="chk-box">'+(isSel?'&#10003;':'')+'</span>'+
+        '<span style="flex:1;display:flex;flex-direction:column;gap:2px">'+
+          '<span>'+o.lbl+'</span>'+
+          (def?'<span class="ind-view-def" data-action="ind-def" data-defid="'+defPanelId+'">View definition</span>':'')+
+        '</span>'+
+        (isBlocked&&conflictMsg?
+          '<span class="tip-conflict"><span class="tip-conflict-body"><strong>&#9888; '+conflictMsg+'</strong>'+
+          (conflictRationale?'<span class="tip-conflict-rationale">'+conflictRationale+'</span>':'')+'</span></span>':'');
+      h+='</div>';
+      if(def){
+        h+='<div class="ind-def-panel" id="'+defPanelId+'">'+
+          '<span class="ind-def-panel-name">'+o.lbl+'</span>'+def+'</div>';
+      }
+    });
+    h+='</div>';
+    var activeConflicts=getActiveConflictMessages(v[step.id],blockInfo);
+    activeConflicts.forEach(function(w){
+      var lA=LABELS[w.selA]||w.selA; var lB=LABELS[w.selB]||w.selB;
+      h+=chipAlert({cls:'ia-warn',icon:'&#9888;',msg:
+        '<strong>Conflict: “'+lA+'” and “'+lB+'” cannot both be selected.</strong>'+
+        (w.rationale?'<br><span style="font-weight:400">'+w.rationale+'</span>':'')+
+        '<br><span style="font-weight:600">Deselect one of these to continue.</span>'
+      });
+    });
+    if(step.alerts){ step.alerts(v).forEach(function(a){ h+=chipAlert(a); }); }
+  }
+
+  if(step.type==='multi_confirm'){
+    var fieldArr=v[step.field]||[];
+    var curSels2=getAllCurrentSels(v);
+    var blockInfo2=getBlockedVals(curSels2);
+    h+='<div class="check-grid">';
+    step.opts.forEach(function(o){
+      var isSel=fieldArr.indexOf(o.val)>=0;
+      var isBlocked=!isSel&&blockInfo2.blocked[o.val];
+      var conflictMsg=isBlocked?(blockInfo2.reasons[o.val]||''):'';
+      var conflictRationale=isBlocked?(blockInfo2.rationales[o.val]||''):'';
+      var cls='chk-btn'+(isSel?' on':'')+(isBlocked?' conflict-blocked':'');
+      var defPanelId='def-'+o.val+'-'+idx;
+      var def=DEFS[o.val]||'';
+      h+='<div class="'+cls+'" '+
+          'data-action="multi" data-field="'+step.field+'" data-val="'+o.val+'"'+
+          (isBlocked?' data-blocked="1"':'')+'>'+
+        '<span class="chk-box">'+(isSel?'&#10003;':'')+'</span>'+
+        '<span style="flex:1;display:flex;flex-direction:column;gap:2px">'+
+          '<span>'+o.lbl+'</span>'+
+          (def?'<span class="ind-view-def" data-action="ind-def" data-defid="'+defPanelId+'">View definition</span>':'')+
+        '</span>'+
+        (isBlocked&&conflictMsg?
+          '<span class="tip-conflict"><span class="tip-conflict-body"><strong>&#9888; '+conflictMsg+'</strong>'+
+          (conflictRationale?'<span class="tip-conflict-rationale">'+conflictRationale+'</span>':'')+'</span></span>':'');
+      h+='</div>';
+      if(def){
+        h+='<div class="ind-def-panel" id="'+defPanelId+'">'+
+          '<span class="ind-def-panel-name">'+o.lbl+'</span>'+def+'</div>';
+      }
+    });
+    h+='</div>';
+    var activeConflicts2=getActiveConflictMessages(fieldArr,blockInfo2);
+    activeConflicts2.forEach(function(w){
+      var lA=LABELS[w.selA]||w.selA; var lB=LABELS[w.selB]||w.selB;
+      h+=chipAlert({cls:'ia-warn',icon:'&#9888;',msg:
+        '<strong>Conflict: “'+lA+'” and “'+lB+'” cannot both be selected.</strong>'+
+        (w.rationale?'<br><span style="font-weight:400">'+w.rationale+'</span>':'')+
+        '<br><span style="font-weight:600">Deselect one of these to continue.</span>'
+      });
+    });
+    if(step.alerts){ step.alerts(v).forEach(function(a){ h+=chipAlert(a); }); }
+    // "None apply" button — shown when no selections made; navy+check when already confirmed
+    if(!step.noNoneBtn){
+      var noneConfirmed=v[step.doneField]===true&&fieldArr.length===0;
+      if(fieldArr.length===0){
+        var noneCls='none-apply-btn'+(noneConfirmed?' selected':'');
+        var noneLabel=(step.doneField==='susp_seen'||step.doneField==='other_seen')?'Does not apply':'None apply';
+        var noneContent=noneConfirmed
+          ?'<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,0.6);font-size:11px">&#10003;</span>'+noneLabel
+          :noneLabel+' &mdash; Continue &#8594;';
+        var noneAction=noneConfirmed?'':'data-action="multi-confirm" data-done="'+step.doneField+'"';
+        h+='<div class="qc-multi-done"><button class="'+noneCls+'" '+noneAction+'>'+noneContent+'</button></div>';
+      }
+    }
+  }
+
+  h+='</div>';
+  return h;
+}
+
+/* ══════════════════════════════════════════
+   INTERACTIONS
+══════════════════════════════════════════ */
+function clearSTEMIFields(idx){
+  var v=S.visits[idx];
+  v.acs_timing=null;
+  v.stemi_lytics=null; v.stemi_lytics_success=null;
+  v.stemi_immediate=null; v.stemi_sx_dur=null; v.stemi_unstable=null;
+}
+
+/* ═══════════════════════════════════════════════
+   STATE REDUCER
+   Single source of truth for all visit state mutations.
+   All cascade clears are co-located here — never scattered.
+   Usage: dispatch(idx, { type: 'SET_YN', field, value })
+═══════════════════════════════════════════════ */
+
+function reducer(visit, action) {
+  // Deep-clone to avoid mutation (simple JSON clone sufficient for flat state)
+  var v = JSON.parse(JSON.stringify(visit));
+
+  switch(action.type) {
+
+    case 'SET_YN':
+      var field = action.field;
+      var val   = action.value;
+      var cur   = (field==='acs_type') ? (v.acs_type[0]||null) : v[field];
+      var next  = (cur===val) ? null : val;
+
+      if(field==='acs_type'){
+        v.acs_type   = next===null ? [] : [next];
+        v.acs_timing = null;
+        v = _clearSTEMI(v);
+      } else {
+        v[field] = next;
+        // Downstream cascades — all in one place
+        if(field==='acs_timing')   v = _clearSTEMI(v);
+        if(field==='stemi_lytics') { v.stemi_lytics_success=null; v.stemi_immediate=null; v.stemi_sx_dur=null; v.stemi_unstable=null; }
+        if(field==='stemi_immediate') { v.stemi_sx_dur=null; v.stemi_unstable=null; }
+        if(field==='stemi_sx_dur')    { v.stemi_unstable=null; }
+        if(field==='angina_yn'&&!next){ v.angina_hx=null; v.angina_worse=null; }
+        if(field==='angina_hx')       { v.angina_worse=null; }
+        if(field==='cad_hx')          { v.cad_stable=null; v.susp_yn=null; }
+        if(field==='staged'&&next)    { v.acs_sel=[]; v.acs_type=[]; v.acs_yn=null; v.newAcsEpisode=null; v=_clearSTEMI(v); }
+        if(field==='newAcsEpisode'&&next!==true){ v.acs_sel=[]; v.acs_type=[]; v.acs_yn=null; v=_clearSTEMI(v); }
+      }
+      break;
+
+    case 'TOGGLE_MULTI':
+      var arr  = v[action.field];
+      var pos  = arr.indexOf(action.value);
+      if(pos>=0) arr.splice(pos,1); else arr.push(action.value);
+      // Mark section seen
+      var seenMap={nonisch_sel:'nonisch_seen',noncardiac_sel:'noncardiac_seen',susp_sel:'susp_seen',other_sel:'other_seen'};
+      if(action.field==='other_sel'&&action.value==='other') v.other_seen=true;
+      if(seenMap[action.field]) v[seenMap[action.field]]=true;
+      break;
+
+    case 'SET_EXCLUSIVE':
+      var excArr = v[action.field];
+      var excPos = excArr.indexOf(action.value);
+      if(excPos>=0) excArr.splice(excPos,1); else { excArr.length=0; excArr.push(action.value); }
+      v.reopenedStep=-1;
+      break;
+
+    case 'CONFIRM_MULTI':
+      v[action.doneField]=true;
+      v.reopenedStep=-1;
+      break;
+
+    case 'CONFIRM_MULTI_EXCLUSIVE':
+      v.reopenedStep=-1;
+      break;
+  }
+
+  return v;
+}
+
+/* Private: clear all STEMI detail fields */
+function _clearSTEMI(v){
+  v.acs_timing=null; v.stemi_lytics=null; v.stemi_lytics_success=null;
+  v.stemi_immediate=null; v.stemi_sx_dur=null; v.stemi_unstable=null;
+  return v;
+}
+
+/* Public clearSTEMIFields — kept for compatibility */
+function clearSTEMIFields(idx){ S.visits[idx]=_clearSTEMI(S.visits[idx]); }
+
+/* dispatch: apply reducer, then re-render */
+function dispatch(idx, action){
+  S.visits[idx] = reducer(S.visits[idx], action);
+  renderThread(idx);
+  buildVisitBar();
+}
+
+/* Legacy shims — keep old function signatures working via dispatch */
+function pickYN(idx,field,val){
+  dispatch(idx, { type:'SET_YN', field:field, value:val });
+}
+function togMulti(idx,field,val){
+  dispatch(idx, { type:'TOGGLE_MULTI', field:field, value:val });
+}
+function pickExclusive(idx,field,val){
+  dispatch(idx, { type:'SET_EXCLUSIVE', field:field, value:val });
+}
+function confirmMultiExclusive(idx,field){
+  dispatch(idx, { type:'CONFIRM_MULTI_EXCLUSIVE', field:field });
+}
+function confirmMulti(idx,doneField){
+  dispatch(idx, { type:'CONFIRM_MULTI', doneField:doneField });
+}
+
+function reopenStep(visitIdx, stepI){
+  S.visits[visitIdx].reopenedStep = stepI;
+  renderThread(visitIdx);
+  setTimeout(function(){
+    var cards=document.querySelectorAll('.q-card');
+    if(cards.length) cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'nearest'});
+  },80);
+}
+
+/* ══════════════════════════════════════════
+   CONTEXT / LOGIC HELPERS
+══════════════════════════════════════════ */
+function priorVisitHadACS(idx){
+  for(var i=0;i<idx;i++){
+    var ps=getSels(i);
+    if(ps.indexOf('acs24')>=0||ps.indexOf('acsgt')>=0) return true;
+  }
+  return false;
+}
+function visitACSChoice(idx){
+  var v=S.visits[idx];
+  return v.acs_type.length>0?v.acs_type[0]:null;
+}
+function visitHasACS(idx){
+  var v=S.visits[idx];
+  return v.acs_type.length>0&&v.acs_type.indexOf('acs_no')<0;
+}
+function acsBlocked(idx){
+  if(idx===0) return false;
+  var v=S.visits[idx];
+  if(v.staged===true) return true;
+  // Prior visit had ACS — blocked unless a new ACS episode is confirmed
+  if(priorVisitHadACS(idx)&&v.newAcsEpisode!==true) return true;
+  return false;
+}
+function suspBlocked(idx){
+  if(idx===0) return false;
+  for(var i=0;i<idx;i++){ if(S.visits[i].cad_hx===true) return true; }
+  return false;
+}
+
+function renderSidebar(){
+  var sidebar=document.getElementById('sel-sidebar');
+  var body=document.getElementById('ss-body');
+  if(!sidebar||!body) return;
+  var h='';
+  for(var i=0;i<S.visits.length;i++){
+    var sels=getSels(i);
+    var v=S.visits[i];
+    var isPCI=v.caseType==='pci';
+    var typeLabel=isPCI?'PCI':'Diag Only';
+    // Append ACS type or Staged if applicable
+    var _acsC=v.acs_type.length>0?v.acs_type[0]:null;
+    var _acsMap={stemi:'STEMI',nstemi:'NSTEMI',ua:'Unstable Angina'};
+    if(_acsC&&_acsMap[_acsC]) typeLabel+=' — <span style="color:#FF6720;font-weight:700">'+_acsMap[_acsC]+'</span>';
+    else if(i>0&&v.staged===true) typeLabel+=' — <span style="color:#FF6720;font-weight:700">Staged</span>';
+    var isActive=i===S.cur;
+    h+='<div class="ss-visit'+(isActive?' ss-visit-active':'')+'">';
+    h+='<div class="ss-visit-label">Visit '+(i+1)+' &middot; '+typeLabel+'</div>';
+
+    {
+      // Seq #7400
+      h+='<div class="ss-section-lbl">Seq #7400</div>';
+      h+='<div>';
+      if(sels.length===0){
+        h+='<span class="ss-empty">No indications yet</span>';
+      } else {
+        sels.forEach(function(s){ h+='<span class="ss-ind-tag">'+(LABELS[s]||s)+'</span>'; });
+      }
+      h+='</div>';
+
+      // Seq #7825 — PCI visits only
+      if(isPCI){
+        h+='<div class="ss-section-lbl">Seq #7825</div>';
+        h+='<div>';
+        var pci=getPCI(i);
+        if(!pci||!sels.length){
+          h+='<span class="ss-empty">Pending selections</span>';
+        } else if(pci.pending){
+          h+='<span class="ss-pci-pending">&#9432; '+pci.opts[0]+'</span>';
+        } else {
+          pci.opts.forEach(function(o){ h+='<span class="ss-pci-tag">'+o+'</span>'; });
+        }
+        h+='</div>';
+      }
+    }
+    h+='</div>';
+    if(i<S.visits.length-1) h+='<hr style="border:none;border-top:1px solid var(--rule);margin:10px 0">';
+  }
+  body.innerHTML=h;
+}
+
+function getSels(idx){
+  var v=S.visits[idx]; var s=[];
+  // Derive acs24/acsgt from new acs_type + acs_timing fields
+  var acsChoice=v.acs_type.length>0?v.acs_type[0]:null;
+  var hasActiveACS=acsChoice&&acsChoice!=='acs_no';
+  if(hasActiveACS && v.acs_timing){
+    if(v.acs_timing==='lte24') s.push('acs24');
+    else if(v.acs_timing==='gt24') s.push('acsgt');
+  }
+  if(v.angina_yn===true){
+    if(v.angina_hx===false) s.push('noa');
+    else if(v.angina_hx===true&&v.angina_worse===true) s.push('wora');
+    // angina_worse===false does not confirm skcad — requires documented CAD in CAD History
+  }
+  if(v.cad_hx===true&&v.cad_stable===true) s.push('skcad');
+  // Also derive skcad when angina pathway determined stable (angina_worse===false)
+  if(v.angina_worse===false&&s.indexOf('skcad')<0) s.push('skcad');
+  if(v.arrest_yn===true) s.push('rca');
+  // Suspected CAD can be answered inline (susp_yn) or via the dedicated section (susp_sel)
+  if(v.susp_yn===true&&s.indexOf('susp')<0) s.push('susp');
+  v.nonisch_sel.forEach(function(x){ if(x!=='other'&&s.indexOf(x)<0) s.push(x); });
+  v.other_sel.forEach(function(x){ if(s.indexOf(x)<0) s.push(x); });
+  v.noncardiac_sel.forEach(function(x){ if(s.indexOf(x)<0) s.push(x); });
+  v.susp_sel.forEach(function(x){ if(s.indexOf(x)<0) s.push(x); });
+  return s;
+}
+
+function getPCI(idx){
+  var v=S.visits[idx];
+  var sels=getSels(idx);
+  var acsChoice=v.acs_type.length>0?v.acs_type[0]:null;
+  var isACS=acsChoice&&acsChoice!=='acs_no';
+  var hasACS=isACS?true:false;
+  var hasOther=sels.some(function(s){ return ['valv','peri','arrh','cmp','lvd','sync','txpl','preo','excc','other'].indexOf(s)>=0; });
+
+  // STEMI pending guard: if incomplete, return pending state without running engine
+  if(acsChoice==='stemi'){
+    if(!v.acs_timing) return {opts:['STEMI'],note:'Answer the ACS timing question, then the STEMI detail questions for a specific indication.',pending:true};
+    if(v.stemi_lytics===null) return {opts:['STEMI'],note:'Answer the STEMI detail questions for a specific PCI indication.',pending:true};
+    if(v.stemi_lytics===true&&v.stemi_lytics_success===null) return {opts:['STEMI'],note:'Answer whether thrombolytics were successful.',pending:true};
+    if(v.stemi_lytics===false&&v.stemi_immediate===null) return {opts:['STEMI'],note:'Answer whether PCI was performed immediately after diagnosis.',pending:true};
+    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur===null) return {opts:['STEMI'],note:'Answer the symptom duration question.',pending:true};
+    if(v.stemi_lytics===false&&v.stemi_immediate===false&&v.stemi_sx_dur!==null&&v.stemi_unstable===null) return {opts:['STEMI'],note:'Answer the stability question.',pending:true};
+  }
+  if(acsChoice==='nstemi'||acsChoice==='ua'){
+    if(!v.acs_timing) return {opts:['NSTE\u2013ACS'],note:'Answer the ACS timing question to confirm indication.',pending:true};
+  }
+
+  // Build facts object for rules engine
+  var facts = {
+    acsChoice: acsChoice||'none',
+    sels: sels,
+    hasACS: hasACS,
+    hasOther: hasOther,
+    stemi_lytics: v.stemi_lytics,
+    stemi_lytics_success: v.stemi_lytics_success,
+    stemi_immediate: v.stemi_immediate,
+    stemi_sx_dur: v.stemi_sx_dur,
+    stemi_unstable: v.stemi_unstable
+  };
+
+  // Run engine — highest-priority matching rule wins
+  // Fallback: if engine unavailable (CDN blocked), derive directly from facts
+  var matched = runEngineSync(facts, 'pci-indication');
+  if(!matched.length && isACS){
+    var _fb={stemi:'STEMI',nstemi:'NSTE–ACS',ua:'NSTE–ACS'};
+    if(_fb[acsChoice]) matched=[{opts:[_fb[acsChoice]],note:''}];
+  }
+  if(matched.length>0){
+    var result = matched[0]; // Engine returns highest-priority first
+    // Stable Known CAD: refine based on angina answer
+    if(result.needsAnginaCheck){
+      if(v.angina_yn===true)  return {opts:['Stable Angina'],note:'Patient reported angina — Stable Angina is the correct PCI indication.'};
+      if(v.angina_yn===false) return {opts:['CAD (without ischemic Sx)'],note:'No angina reported — CAD without ischemic symptoms is the correct PCI indication.'};
+      return {opts:result.opts, note:result.note, pending:true};
+    }
+    return {opts:result.opts, note:result.note};
+  }
+  return null;
+}
+
+/* ══════════════════════════════════════════
+   RESULTS
+══════════════════════════════════════════ */
+function renderResults(){
+  // Results are now rendered in the sidebar — renderSidebar handles everything
+  renderSidebar();
+  return;
+  var el=document.getElementById('results');
+  if(!el||!S.n) return;
+  var h='<div class="res-hdr"><div class="res-hdr-title">Results Summary</div>'+
+    '<div class="res-hdr-sub">NCDR CathPCI Seq #7400 &amp; Seq #7825</div></div>';
+
+  for(var i=0;i<S.n;i++){
+    var v=S.visits[i]; var sels=getSels(i); var pci=v.caseType==='pci'?getPCI(i):null;
+    var ctx=[];
+    ctx.push(v.caseType==='pci'?'PCI':'Diagnostic Only');
+    if(i>0&&v.staged===true) ctx.push('Staged');
+    // Add ACS type if selected
+    var _acsChoice=v.acs_type.length>0?v.acs_type[0]:null;
+    if(_acsChoice&&_acsChoice!=='acs_no'){
+      var _acsLabels={stemi:'STEMI',nstemi:'NSTEMI',ua:'Unstable Angina'};
+      if(_acsLabels[_acsChoice]) ctx.push(_acsLabels[_acsChoice]);
+    }
+
+    h+='<div class="res-visit"><div class="rv-card">';
+    h+='<div class="rv-top"><div class="rv-badge">'+(i+1)+'</div>';
+    h+='<div><div class="rv-name">Visit '+(i+1)+'</div>';
+    h+='<div class="rv-ctx">'+ctx.join(' &bull; ')+'</div></div></div>';
+    h+='<div class="rv-body">';
+
+    {
+      // Seq #7400
+      var colSpan=(v.caseType==='pci'&&pci)?'':'style="grid-column:1/-1"';
+      h+='<div class="rv-section" '+colSpan+'><div class="rv-sec-lbl">Cath Lab Indication(s) — Seq #7400</div><div class="rv-tags">';
+      if(!sels.length) h+='<span class="rv-empty">No indications selected yet</span>';
+      else sels.forEach(function(s){ h+='<span class="rv-tag">'+(LABELS[s]||s)+'</span>'; });
+      h+='</div></div>';
+      // Seq #7825 — only for PCI visits
+      if(v.caseType==='pci'){
+        h+='<div class="rv-section"><div class="rv-sec-lbl">PCI Indication — Seq #7825</div>';
+        if(!pci||!sels.length) h+='<span class="rv-empty">Pending Seq #7400 selections</span>';
+        else if(pci.pending){
+          h+='<div class="rv-tags">';
+          pci.opts.forEach(function(o){ h+='<span class="rv-tag" style="background:rgba(245,166,35,0.1);border-color:rgba(245,166,35,0.35);color:#F5A623">'+o+'</span>'; });
+          h+='</div>';
+          if(pci.note) h+='<div class="rv-note" style="color:#b07800">&#9432; '+pci.note+'</div>';
+        } else {
+          h+='<div class="rv-tags">';
+          pci.opts.forEach(function(o){ h+='<span class="rv-tag rv-tag-pci">'+o+'</span>'; });
+          h+='</div>';
+          if(pci.note) h+='<div class="rv-note">'+pci.note+'</div>';
+        }
+        h+='</div>';
+      }
+    }
+    h+='</div></div></div>';
+  }
+  el.innerHTML=h;
+}
+
+// Keep showResults as alias for sidebar button compatibility
+function showResults(){ renderResults(); }
+</script>
+</body>
+</html>
