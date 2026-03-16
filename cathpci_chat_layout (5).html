@@ -1425,8 +1425,12 @@ function getActiveConflictMessages(selectedArr, blockInfo) {
   var seen = {};
   selectedArr.forEach(function(sel) {
     CONFLICT_RULES.forEach(function(rule) {
-      if(rule.trigger === sel && selectedArr.indexOf(rule.blocks[0])>=0) {
-        if(!seen[rule.reason]){
+      if(rule.trigger === sel) {
+        var hasConflict = false;
+        for(var b=0; b<rule.blocks.length; b++) {
+          if(selectedArr.indexOf(rule.blocks[b])>=0) { hasConflict=true; break; }
+        }
+        if(hasConflict && !seen[rule.reason]){
           seen[rule.reason]=true;
           msgs.push({reason:rule.reason, rationale:rule.rationale||''});
         }
@@ -1618,7 +1622,7 @@ function getAllCurrentSels(v) {
   if(v.angina_hx===true && v.angina_worse===true) all.push('wora');
   // angina_worse===false alone does not confirm skcad — CAD History must confirm cad_hx===true
   if(v.cad_hx===true && v.cad_stable===true) all.push('skcad');
-  if(v.angina_worse===false&&all.indexOf('skcad')<0) all.push('skcad');
+  if(v.angina_worse===false&&v.cad_hx===true&&all.indexOf('skcad')<0) all.push('skcad');
   if(v.arrest_yn===true) all.push('rca');
   (v.nonisch_sel||[]).forEach(function(s){ if(s!=='other'&&all.indexOf(s)<0) all.push(s); });
   (v.other_sel||[]).forEach(function(s){ if(all.indexOf(s)<0) all.push(s); });
@@ -1824,7 +1828,7 @@ function buildThread(idx){
     var ans=step.getAnswer(v);
     var isAnswered=ans!==null;
     var isReopened=reopened===myStepIdx;
-    var isPending=!isAnswered&&!isReopened&&(firstUnanswered<myStepIdx||(firstUnanswered!==myStepIdx));
+    var isPending=!isAnswered&&!isReopened&&firstUnanswered<myStepIdx;
 
     if(i===firstUnanswered){
       // Show conflict warnings before the first unanswered question
