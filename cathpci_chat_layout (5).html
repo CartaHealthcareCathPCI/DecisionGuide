@@ -2475,7 +2475,9 @@ function openCard(step, idx, v, isActive){
     // Step IDs where val:false is an affirmative clinical finding (should be green)
     var falseIsGreen=['stemi_lytics','stemi_lytics_success','stemi_immediate',
                       'stemi_unstable','stemi_shock','stemi_ischemia',
-                      'cad_stable'];
+                      'cad_stable','angina_hx'];
+    // Step IDs where val:true should be navy (not the typical green affirmative)
+    var trueIsNavy=['angina_hx'];
     // Use getAnswer() so array-backed fields (acs_type) resolve correctly
     var answered=step.getAnswer(v);
     step.opts.forEach(function(o){
@@ -2484,8 +2486,8 @@ function openCard(step, idx, v, isActive){
       var isOn=(answered!==null)&&(
         Array.isArray(answered) ? answered.indexOf(o.val)>=0 : answered===o.val
       );
-      // Navy style: "No ACS" skip option, or val===false on non-affirmative steps
-      var isNavy=isOn&&(o.val==='acs_no'||(o.val===false&&falseIsGreen.indexOf(step.id)<0));
+      // Navy style: "No ACS" skip option, val===false on non-affirmative steps, or val===true on trueIsNavy steps
+      var isNavy=isOn&&(o.val==='acs_no'||(o.val===false&&falseIsGreen.indexOf(step.id)<0)||(o.val===true&&trueIsNavy.indexOf(step.id)>=0));
       var cls='ans-btn'+(isOn?(isNavy?' on ans-btn-navy':' on'):'');
       var dval=JSON.stringify(o.val);
       h+='<button class="'+cls+'" '+
