@@ -1914,6 +1914,7 @@ function getSteps(idx){
   var isFirst=idx===0;
   var acsBlk=acsBlocked(idx);
   var suspBlk=suspBlocked(idx);
+  var diagAcsInfo=(v.caseType==='pci')?diagOnlyACSInfo(idx):null;
   var steps=[];
 
   if(!isFirst){
@@ -1992,11 +1993,12 @@ function getSteps(idx){
     steps.push({blocked:true, blockedMsg:acsBlockReason});
   } else {
     // Single exclusive ACS type selection
+    var _diagAcsHint=diagAcsInfo?'The <strong>'+diagAcsInfo.label+'</strong> documented in the Diagnostic Only cath lab visit (Visit '+diagAcsInfo.visitNum+') is not considered \u201cover\u201d until PCI has occurred \u2014 capture it in this visit. Be sure to update the timing to reflect the time from diagnosis to this cath lab visit.':null;
     steps.push({
       id:'acs_type',
       field:'acs_type',
       q:(priorVisitHadACS(idx)?'What type of ACS is documented for this new episode?':'Is the patient being brought to the Cath Lab for:'),
-      
+      hint:_diagAcsHint,
       chipLabel:'ACS type',
       type:'yn',
       opts:[
@@ -2749,6 +2751,20 @@ function acsBlocked(idx){
   // Prior visit had ACS — blocked unless a new ACS episode is confirmed
   if(priorVisitHadACS(idx)&&v.newAcsEpisode!==true) return true;
   return false;
+}
+function diagOnlyACSInfo(idx){
+  // Returns ACS info from the most recent prior Diagnostic Only visit that had ACS,
+  // but only when no prior PCI has already coded ACS (which would close it).
+  if(priorVisitHadACS(idx)) return null;
+  var labels={stemi:'STEMI',nstemi:'NSTEMI',ua:'Unstable Angina'};
+  for(var i=idx-1;i>=0;i--){
+    var vi=S.visits[i];
+    if(vi.caseType!=='pci'){
+      var acsT=vi.acs_type.length>0?vi.acs_type[0]:null;
+      if(acsT&&labels[acsT]) return {type:acsT,label:labels[acsT],visitNum:i+1};
+    }
+  }
+  return null;
 }
 function suspBlocked(idx){
   if(idx===0) return false;
