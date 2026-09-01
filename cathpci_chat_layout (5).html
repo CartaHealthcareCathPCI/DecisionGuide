@@ -1613,7 +1613,7 @@ function buildRulesEngine() {
   engine.addRule({
     name: 'pci:new-onset-angina',
     conditions: { all:[{ fact:'sels', operator:'contains', value:'noa' },{ fact:'hasACS', operator:'equal', value:false }]},
-    event: { type:'pci-indication', params:{ opts:['New Onset Angina ≤22 months'], note:'New Onset Angina ≤22 months → PCI Indication: New Onset Angina ≤22 months.' }}
+    event: { type:'pci-indication', params:{ opts:['New Onset Angina ≤2 months'], note:'New Onset Angina ≤2 months → PCI Indication: New Onset Angina ≤2 months.' }}
   });
   engine.addRule({
     name: 'pci:stable-known-cad',
