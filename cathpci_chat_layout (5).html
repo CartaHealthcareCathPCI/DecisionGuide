@@ -1926,6 +1926,7 @@ function getSteps(idx){
   var acsBlk=acsBlocked(idx);
   var suspBlk=suspBlocked(idx);
   var diagAcsInfo=(v.caseType==='pci')?diagOnlyACSInfo(idx):null;
+  var diagAnginaInfo=(v.caseType==='pci')?diagOnlyAnginaInfo(idx):null;
   var steps=[];
 
   if(!isFirst){
@@ -2158,9 +2159,11 @@ function getSteps(idx){
   // ── ANGINA ──
   steps.push({divider:true, icon:'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 36 36\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M18,28 C18,28 6,20 6,13 C6,9 9,7 12,7 C14.5,7 16.5,8.5 18,10.5 C19.5,8.5 21.5,7 24,7 C27,7 30,9 30,13 C30,20 18,28 18,28Z\" fill=\"rgba(255,255,255,0.15)\"/><line x1=\"18\" y1=\"2\" x2=\"18\" y2=\"5\"/><line x1=\"10\" y1=\"4\" x2=\"12\" y2=\"6.5\"/><line x1=\"26\" y1=\"4\" x2=\"24\" y2=\"6.5\"/><line x1=\"6\" y1=\"9\" x2=\"8.5\" y2=\"10.5\"/><line x1=\"30\" y1=\"9\" x2=\"27.5\" y2=\"10.5\"/></svg>', label:'Angina'});
 
+  var _diagAnginaHint=diagAnginaInfo?'The <strong>Chest Pain Symptom Assessment (Seq #7405)</strong> documented in the Diagnostic Only cath lab visit (Visit '+diagAnginaInfo.visitNum+') continues to be applicable for this PCI visit \u2014 capture it here as well. The patient does <strong>not</strong> have to be exhibiting symptoms when presenting for this procedure to support coding.':null;
   steps.push({
     id:'angina_yn',
     q:'Has the patient experienced Chest Pain or a documented anginal equivalent prior to this Cath Lab visit?',
+    hint:_diagAnginaHint,
     chipLabel:'Angina/chest pain?',
     type:'yn',
     opts:[{val:true,lbl:'Yes'},{val:false,lbl:'No Angina — move to next question'}],
@@ -2774,6 +2777,24 @@ function diagOnlyACSInfo(idx){
       var acsT=vi.acs_type.length>0?vi.acs_type[0]:null;
       if(acsT&&labels[acsT]) return {type:acsT,label:labels[acsT],visitNum:i+1};
     }
+  }
+  return null;
+}
+function priorPCIHadAngina(idx){
+  // Chest Pain Symptom Assessment carries forward only until a PCI visit has captured it
+  for(var i=0;i<idx;i++){
+    if(S.visits[i].caseType==='pci'&&S.visits[i].angina_yn===true) return true;
+  }
+  return false;
+}
+function diagOnlyAnginaInfo(idx){
+  // Returns Chest Pain Symptom Assessment (Seq #7405) info from the most recent prior
+  // Diagnostic Only visit that documented chest pain / anginal symptoms, but only when
+  // no prior PCI visit has already captured it.
+  if(priorPCIHadAngina(idx)) return null;
+  for(var i=idx-1;i>=0;i--){
+    var vi=S.visits[i];
+    if(vi.caseType!=='pci'&&vi.angina_yn===true) return {visitNum:i+1};
   }
   return null;
 }
